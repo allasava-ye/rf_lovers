@@ -38,52 +38,66 @@ try {
         products = [
             {
                 id: 1,
-                name: "Красная роза",
-                description: "Классическая красная роза — символ любви и страсти. Свежая срезка, насыщенный цвет.",
-                image: "https://images.unsplash.com/photo-1562690868-60bbe7293e94?auto=format&fit=crop&w=600&q=80",
-                variants: [
-                    { qty: 1, price: 350 },
-                    { qty: 5, price: 1650 },
-                    { qty: 11, price: 3500 },
-                    { qty: 25, price: 7500 }
-                ],
-                stock: 100
+                name: "Розовая хризантема",
+                description: "Пышная хризантема в нежно-розовом обрамлении. Говорит о тепле и любви — именно то, что нужно для самого близкого человека.",
+                image: "/rflovers_buket1.jpg",
+                category: "mama",
+                variants: [{ qty: 1, price: 3499 }],
+                stock: 50
             },
             {
                 id: 2,
-                name: "Розовый пион",
-                description: "Пышный розовый пион с тонким ароматом. Идеально для букетов и подарков.",
-                image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=600&q=80",
-                variants: [
-                    { qty: 1, price: 500 },
-                    { qty: 3, price: 1400 },
-                    { qty: 5, price: 2300 },
-                    { qty: 9, price: 4000 }
-                ],
+                name: "Розы фуксия",
+                description: "Яркие розы насыщенного цвета фуксия в кремовой упаковке. Дерзкий и романтичный выбор — такой букет не останется незамеченным.",
+                image: "/rflovers_buket2.jpg",
+                category: "date",
+                variants: [{ qty: 1, price: 3199 }],
                 stock: 50
             },
             {
                 id: 3,
-                name: "Тюльпан",
-                description: "Яркие весенние тюльпаны. Свежие, объёмные, создают настроение.",
-                image: "https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=600&q=80",
-                variants: [
-                    { qty: 5, price: 1000 },
-                    { qty: 11, price: 2000 },
-                    { qty: 25, price: 4500 }
-                ],
-                stock: 200
+                name: "Персиковые розы Джульетта",
+                description: "Пионовидные розы сорта Джульетта в оттенке персика. Нежный и изысканный букет для особенного дня — когда хочется сказать что-то большее.",
+                image: "/rflovers_buket3.jpg",
+                category: "anniversary",
+                variants: [{ qty: 1, price: 3799 }],
+                stock: 30
             },
             {
                 id: 4,
-                name: "Гортензия",
-                description: "Объёмная гортензия — воздушные лепестки, богатый вид. Отлично смотрится в любом интерьере.",
-                image: "https://images.unsplash.com/photo-1628704499120-1a7421808e00?auto=format&fit=crop&w=600&q=80",
-                variants: [
-                    { qty: 1, price: 1500 },
-                    { qty: 3, price: 4000 }
-                ],
-                stock: 20
+                name: "Облако ромашек",
+                description: "Лёгкий и живой букет из свежих ромашек в белоснежной упаковке. Летний, солнечный — для тех, кто умеет радоваться мелочам.",
+                image: "/rflovers_buket4.jpg",
+                category: "justbecause",
+                variants: [{ qty: 1, price: 2999 }],
+                stock: 40
+            },
+            {
+                id: 5,
+                name: "Кораллово-розовые розы",
+                description: "Крупные розы кораллово-розового оттенка в фирменной упаковке с кружевной лентой. Пышный и праздничный — именно такой букет запоминается.",
+                image: "/rflovers_buket5.jpg",
+                category: "birthday",
+                variants: [{ qty: 1, price: 3599 }],
+                stock: 40
+            },
+            {
+                id: 6,
+                name: "Ирисы",
+                description: "Благородные ирисы глубокого фиолетового цвета в графитовой упаковке. Стильный и сдержанный букет — для торжественного случая без лишней сентиментальности.",
+                image: "/rflovers_buket6.jpg",
+                category: "colleague",
+                variants: [{ qty: 1, price: 2799 }],
+                stock: 35
+            },
+            {
+                id: 7,
+                name: "Красные розы",
+                description: "Классические красные розы в матовой упаковке с алой лентой. Когда слова лишние — говорят только цветы.",
+                image: "/rflovers_buket7.jpg",
+                category: "love",
+                variants: [{ qty: 1, price: 3299 }],
+                stock: 50
             }
         ];
         fs.writeFileSync(DB_FILE, JSON.stringify(products, null, 2), 'utf8');
