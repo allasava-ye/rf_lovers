@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RF-lovers — Управление</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #ffffff;
+            --bg-alt:  #f7f7f7;
+            --text:    #1a1a1a;
+            --text-sec:#666666;
+            --price:   #e8622a;
+            --cta:     #4a90e2;
+            --border:  #eeeeee;
+            --danger:  #d94040;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding-bottom: 50px;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 16px 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .header-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+        .header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.3px; }
+
+        .page-padding { padding: 0 16px; }
+
+        /* ── Views ── */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: block;
+            width: 100%;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn-primary { background: var(--cta); color: #fff; }
+        .btn-danger  { background: var(--danger); color: #fff; }
+        .btn-secondary {
+            background: var(--bg-alt);
+            color: var(--text-sec);
+            border: 1.5px solid var(--border);
+            margin-top: 10px;
+        }
+
+        /* ── List items ── */
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .list-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+        .list-info { flex: 1; min-width: 0; }
+        .list-info h3 { font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .list-price { color: var(--price); font-weight: 700; font-size: 0.88rem; margin-top: 2px; }
+        .list-stock { font-size: 0.78rem; color: var(--text-sec); margin-top: 1px; }
+
+        .actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+        .btn-sm {
+            padding: 7px 10px;
+            font-size: 0.78rem;
+            border-radius: 7px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+        }
+        .btn-sm:active { opacity: 0.75; }
+        .btn-sm-edit   { background: #e8f0fb; color: var(--cta); }
+        .btn-sm-danger { background: #fde8e8; color: var(--danger); }
+
+        /* ── Form ── */
+        .form-header {
+            padding: 16px 16px 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .form-header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.3px; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { border-color: var(--cta); }
+        .form-group textarea { resize: vertical; }
+
+        /* ── Variant rows ── */
+        .variant-row input {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            padding: 9px 11px;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .variant-row input:focus { border-color: var(--cta); }
+    </style>
+</head>
+<body>
+    <div id="view-list" class="view active">
+        <div class="header">
+            <img class="header-logo" src="/logo.jpg" alt="RF-lovers">
+            <h1>Управление магазином</h1>
+        </div>
+        <div class="page-padding">
+            <button class="btn btn-primary" style="margin-bottom:16px;" onclick="showForm()">+ Добавить товар</button>
+            <div id="products-list"></div>
+        </div>
+    </div>
+
+    <div id="view-form" class="view">
+        <div class="form-header">
+            <h1 id="form-title">Добавить товар</h1>
+        </div>
+        <div class="page-padding">
+            <div class="form-group">
+                <label>Название</label>
+                <input type="text" id="p-name">
+            </div>
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea id="p-desc" rows="3"></textarea>
+            </div>
+            <div class="form-group" id="variants-container">
+                <label>Варианты (Кол-во и Цена)</label>
+            </div>
+            <button type="button" class="btn btn-secondary" style="margin-bottom:14px;font-size:0.85rem;padding:9px;" onclick="addVariantRow()">+ Добавить вариант</button>
+
+            <div class="form-group">
+                <label>Фотография</label>
+                <input type="file" id="p-photo" accept="image/*" capture="environment">
+                <input type="hidden" id="p-image">
+            </div>
+            <div class="form-group">
+                <label>В наличии (шт.)</label>
+                <input type="number" id="p-stock" placeholder="100">
+            </div>
+            <input type="hidden" id="p-id">
+
+            <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
+            <button class="btn btn-secondary" onclick="showList()">Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        let products = [];
+
+        async function loadProducts() {
+            try {
+                const res = await fetch('/api/products');
+                products = await res.json();
+                renderList();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function renderList() {
+            const list = document.getElementById('products-list');
+            list.innerHTML = '';
+            products.forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'list-item';
+                const minPrice = p.variants && p.variants.length > 0
+                    ? Math.min(...p.variants.map(v => v.price))
+                    : 0;
+                el.innerHTML = `
+                    <img src="${p.image}" alt="">
+                    <div class="list-info">
+                        <h3>${p.name}</h3>
+                        <div class="list-price">от ${minPrice} ₽</div>
+                        <div class="list-stock">Остаток: ${p.stock || 0} шт.</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-sm btn-sm-edit" onclick="editProduct(${p.id})">✏️ Ред.</button>
+                        <button class="btn-sm btn-sm-danger" onclick="confirmDelete(${p.id})">🗑 Удал.</button>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function showList() {
+            document.getElementById('view-form').classList.remove('active');
+            document.getElementById('view-list').classList.add('active');
+            tg.BackButton.hide();
+        }
+
+        function addVariantRow(qty = '', price = '') {
+            const container = document.getElementById('variants-container');
+            const row = document.createElement('div');
+            row.className = 'variant-row';
+            row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+            row.innerHTML = `
+                <input type="number" placeholder="Шт." class="v-qty" value="${qty}" style="flex:1;">
+                <input type="number" placeholder="Цена ₽" class="v-price" value="${price}" style="flex:1;">
+                <button type="button" class="btn-sm btn-sm-danger" onclick="this.parentElement.remove()" style="padding:9px 11px;">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function showForm(product = null) {
+            document.getElementById('view-list').classList.remove('active');
+            document.getElementById('view-form').classList.add('active');
+            tg.BackButton.show();
+            tg.BackButton.onClick(showList);
+
+            const vContainer = document.getElementById('variants-container');
+            vContainer.innerHTML = '<label>Варианты (Кол-во и Цена)</label>';
+
+            if (product) {
+                document.getElementById('form-title').innerText = 'Редактировать товар';
+                document.getElementById('p-id').value    = product.id;
+                document.getElementById('p-name').value  = product.name;
+                document.getElementById('p-desc').value  = product.description || '';
+                document.getElementById('p-image').value = product.image;
+                document.getElementById('p-photo').value = '';
+                document.getElementById('p-stock').value = product.stock || 0;
+                if (product.variants && product.variants.length > 0) {
+                    product.variants.forEach(v => addVariantRow(v.qty, v.price));
+                } else {
+                    addVariantRow();
+                }
+            } else {
+                document.getElementById('form-title').innerText = 'Добавить товар';
+                document.getElementById('p-id').value    = '';
+                document.getElementById('p-name').value  = '';
+                document.getElementById('p-desc').value  = '';
+                document.getElementById('p-image').value = '';
+                document.getElementById('p-photo').value = '';
+                document.getElementById('p-stock').value = 100;
+                addVariantRow();
+            }
+        }
+
+        function editProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (p) showForm(p);
+        }
+
+        function confirmDelete(id) {
+            tg.showPopup({
+                title: 'Подтверждение',
+                message: 'Удалить этот товар?',
+                buttons: [
+                    { id: 'delete', type: 'destructive', text: 'Удалить' },
+                    { type: 'cancel', text: 'Отмена' }
+                ]
+            }, async (btnId) => {
+                if (btnId === 'delete') {
+                    await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                    loadProducts();
+                }
+            });
+        }
+
+        async function saveProduct() {
+            const id        = document.getElementById('p-id').value;
+            const name      = document.getElementById('p-name').value.trim();
+            const desc      = document.getElementById('p-desc').value.trim();
+            let   image     = document.getElementById('p-image').value.trim();
+            const stock     = parseInt(document.getElementById('p-stock').value) || 0;
+            const photoFile = document.getElementById('p-photo').files?.[0] || null;
+
+            if (!name) { tg.showAlert('Заполните название товара'); return; }
+
+            const variantRows = document.querySelectorAll('.variant-row');
+            let variants = [];
+            variantRows.forEach(row => {
+                const q = parseInt(row.querySelector('.v-qty').value);
+                const p = parseFloat(row.querySelector('.v-price').value);
+                if (!isNaN(q) && !isNaN(p)) variants.push({ qty: q, price: p });
+            });
+            if (variants.length === 0) { tg.showAlert('Добавьте хотя бы один вариант'); return; }
+
+            if (photoFile) {
+                const formData = new FormData();
+                formData.append('photo', photoFile);
+                try {
+                    const uploadRes  = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.success) {
+                        image = uploadData.url;
+                    } else {
+                        tg.showAlert('Ошибка загрузки фото'); return;
+                    }
+                } catch(e) {
+                    tg.showAlert('Ошибка соединения при загрузке фото'); return;
+                }
+            }
+
+            if (!image) { tg.showAlert('Выберите фото или укажите ссылку'); return; }
+
+            const payload = { name, description: desc, image, variants, stock };
+
+            if (id) {
+                await fetch(`/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                await fetch('/api/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            showList();
+            loadProducts();
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>

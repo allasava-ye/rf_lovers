@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RF-lovers</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #ffffff;
+            --text:    #1a1a1a;
+            --text-sec:#666666;
+            --price:   #e8622a;
+            --cta:     #4a90e2;
+            --border:  #eeeeee;
+            --pill-border: #dddddd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        .hidden { display: none !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .header-text { flex: 1; }
+        .header-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.3px;
+            line-height: 1;
+        }
+        .header-text p {
+            font-size: 0.75rem;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        .page-padding { padding: 0 16px; }
+
+        /* ── Category pills (Instagram highlights style) ── */
+        .categories-wrap {
+            overflow-x: auto;
+            scrollbar-width: none;
+            margin: 0 -16px 20px;
+            padding: 0 16px;
+        }
+        .categories-wrap::-webkit-scrollbar { display: none; }
+        .categories {
+            display: flex;
+            gap: 14px;
+            width: max-content;
+        }
+        .cat-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .cat-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 2px solid var(--pill-border);
+            overflow: hidden;
+            transition: border-color 0.2s;
+            background: var(--border);
+        }
+        .cat-pill.active .cat-avatar { border-color: var(--cta); border-width: 2.5px; }
+        .cat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .cat-avatar.all-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--text);
+            font-size: 1.4rem;
+        }
+        .cat-pill span {
+            font-size: 0.68rem;
+            color: var(--text-sec);
+            font-weight: 500;
+            max-width: 60px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cat-pill.active span { color: var(--cta); font-weight: 700; }
+
+        /* ── Product grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: transform 0.15s;
+        }
+        .card:active { transform: scale(0.97); }
+
+        .card-img-wrap { position: relative; }
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            background: var(--border);
+        }
+        .price-tag {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: var(--price);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.78rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.2px;
+        }
+        .card-body { padding: 10px 10px 12px; }
+        .card-body h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        /* ── Details view ── */
+        .detail-img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+            background: var(--border);
+        }
+        .detail-body { padding: 16px 16px 0; }
+        .details-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .details-price {
+            font-size: 1.15rem;
+            color: var(--price);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .details-desc {
+            color: var(--text-sec);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+        .details-stock {
+            font-size: 0.82rem;
+            color: var(--text-sec);
+            margin-bottom: 20px;
+        }
+
+        .qty-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .qty-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .qty-btn {
+            background: #fff;
+            border: 1.5px solid var(--pill-border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex: 1 1 calc(33.333% - 8px);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .qty-btn.selected {
+            background: var(--cta);
+            color: #ffffff;
+            border-color: var(--cta);
+        }
+
+        /* ── Checkout form ── */
+        .checkout-header {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .checkout-header h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+        .checkout-header p {
+            font-size: 0.82rem;
+            color: var(--text-sec);
+            margin-top: 3px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-group input {
+            width: 100%;
+            background: #fff;
+            border: 1.5px solid var(--pill-border);
+            color: var(--text);
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus { border-color: var(--cta); }
+        .error { color: #d94040; font-size: 0.8rem; margin-top: 4px; }
+
+        /* ── Order summary ── */
+        .order-summary {
+            background: #fafafa;
+            border: 1.5px solid var(--border);
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--text-sec);
+            font-size: 0.9rem;
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1.5px solid var(--border);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* ── Success view ── */
+        .success-wrap {
+            padding: 40px 16px 0;
+            text-align: center;
+        }
+        .success-icon { font-size: 3rem; margin-bottom: 14px; }
+        .success-wrap h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+        .success-wrap p { font-size: 0.9rem; color: var(--text-sec); margin-bottom: 24px; }
+
+        /* ── CTA button (bright blue, full-width, rounded) ── */
+        .btn-cta {
+            display: block;
+            width: 100%;
+            background: var(--cta);
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.15s;
+            font-family: 'Inter', sans-serif;
+            margin-top: 20px;
+        }
+        .btn-cta:active { opacity: 0.85; }
+
+        .out-of-stock {
+            color: #d94040;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Products View -->
+        <div id="view-grid" class="view active">
+            <div class="header">
+                <img class="header-logo" src="/logo.jpg" alt="RF-lovers">
+                <div class="header-text">
+                    <h1>RF-lovers</h1>
+                    <p>Свежие цветы с доставкой</p>
+                </div>
+            </div>
+            <div class="page-padding">
+                <div class="categories-wrap">
+                    <div class="categories" id="categories"></div>
+                </div>
+                <div class="grid" id="products-grid"></div>
+            </div>
+        </div>
+
+        <!-- Details View -->
+        <div id="view-details" class="view">
+            <div id="details-content"></div>
+        </div>
+
+        <!-- Checkout View -->
+        <div id="view-checkout" class="view">
+            <div class="checkout-header">
+                <h1>Оформление заказа</h1>
+                <p>Заполните данные для доставки</p>
+            </div>
+            <div class="page-padding">
+                <div class="form-group">
+                    <label for="fullname">ФИО получателя</label>
+                    <input type="text" id="fullname" placeholder="Иванов Иван Иванович" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">Город</label>
+                    <input type="text" id="city" placeholder="Москва" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px;">
+                    <div class="form-group">
+                        <label for="street">Улица</label>
+                        <input type="text" id="street" placeholder="Ленина" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="building">Дом</label>
+                        <input type="text" id="building" placeholder="12" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="corp">Корпус</label>
+                        <input type="text" id="corp" placeholder="А">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <div class="form-group">
+                        <label for="entrance">Подъезд</label>
+                        <input type="text" id="entrance" placeholder="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="floor">Этаж</label>
+                        <input type="text" id="floor" placeholder="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="apartment">Квартира</label>
+                        <input type="text" id="apartment" placeholder="42">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="intercom">Домофон</label>
+                    <input type="text" id="intercom" placeholder="42К">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" required>
+                    <div id="phone-error" class="error hidden">Введите корректный номер (+7 999 123-45-67)</div>
+                </div>
+                <div class="order-summary" id="order-summary"></div>
+            </div>
+        </div>
+
+        <!-- Success View -->
+        <div id="view-success" class="view">
+            <div class="success-wrap">
+                <div class="success-icon">🌷</div>
+                <h1>Заказ оформлен!</h1>
+                <p>Менеджер RF-lovers свяжется с вами в ближайшее время.</p>
+            </div>
+            <div class="page-padding">
+                <div class="order-summary" id="success-details"></div>
+                <button class="btn-cta" onclick="goHome()">Вернуться в магазин</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        let products = [];
+        let cart = {};
+        let currentView = 'grid';
+        let currentProduct = null;
+        let activeCategory = 'all'; // 'all' или product.id
+
+        async function init() {
+            try {
+                const res = await fetch('/api/products');
+                products = await res.json();
+                renderCategories();
+                renderGrid();
+            } catch (e) {
+                console.error(e);
+                tg.showAlert('Ошибка загрузки. Перезапустите приложение.');
+            }
+        }
+
+        // ── Category pills ────────────────────────────────────────────────────
+        function renderCategories() {
+            const wrap = document.getElementById('categories');
+            wrap.innerHTML = '';
+
+            // "Все" pill
+            const allPill = document.createElement('div');
+            allPill.className = 'cat-pill' + (activeCategory === 'all' ? ' active' : '');
+            allPill.onclick = () => { activeCategory = 'all'; renderCategories(); renderGrid(); };
+            allPill.innerHTML = `
+                <div class="cat-avatar all-avatar">🌷</div>
+                <span>Все</span>
+            `;
+            wrap.appendChild(allPill);
+
+            // One pill per product
+            products.forEach(p => {
+                const pill = document.createElement('div');
+                pill.className = 'cat-pill' + (activeCategory === p.id ? ' active' : '');
+                pill.onclick = () => { activeCategory = p.id; renderCategories(); renderGrid(); };
+                pill.innerHTML = `
+                    <div class="cat-avatar"><img src="${p.image}" alt="${p.name}"></div>
+                    <span>${p.name}</span>
+                `;
+                wrap.appendChild(pill);
+            });
+        }
+
+        // ── Product grid ──────────────────────────────────────────────────────
+        function renderGrid() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+
+            const visible = activeCategory === 'all'
+                ? products
+                : products.filter(p => p.id === activeCategory);
+
+            visible.forEach(p => {
+                const minPrice = p.variants && p.variants.length > 0
+                    ? Math.min(...p.variants.map(v => v.price))
+                    : 0;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetails(p);
+                card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <img src="${p.image}" alt="${p.name}">
+                        <div class="price-tag">от ${minPrice} ₽</div>
+                    </div>
+                    <div class="card-body">
+                        <h3>${p.name}</h3>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ── Details ───────────────────────────────────────────────────────────
+        function showDetails(product) {
+            currentProduct = product;
+            switchView('details');
+
+            tg.BackButton.show();
+            tg.BackButton.onClick(handleBack);
+
+            const container = document.getElementById('details-content');
+
+            let qButtons = '';
+            if (product.variants && product.variants.length > 0) {
+                qButtons = product.variants
+                    .filter(v => v.qty <= (product.stock || 0))
+                    .map(v => {
+                        const isSelected = cart[product.id] && cart[product.id].quantity === v.qty;
+                        return `<button class="qty-btn ${isSelected ? 'selected' : ''}" onclick="selectQty(${product.id}, ${v.qty}, ${v.price})" style="display:flex;flex-direction:column;align-items:center;"><span>${v.qty} шт.</span><span style="font-size:0.75rem;opacity:0.75;">${v.price} ₽</span></button>`;
+                    }).join('');
+            }
+
+            const qtySection = qButtons
+                ? `<div class="qty-title">Выберите вариант</div><div class="qty-grid">${qButtons}</div>`
+                : `<div class="out-of-stock">Нет в наличии</div>`;
+
+            const minPrice = product.variants && product.variants.length > 0
+                ? Math.min(...product.variants.map(v => v.price))
+                : 0;
+
+            container.innerHTML = `
+                <img class="detail-img" src="${product.image}" alt="${product.name}">
+                <div class="detail-body">
+                    <h2 class="details-title">${product.name}</h2>
+                    <div class="details-price">от ${minPrice} ₽</div>
+                    <p class="details-desc">${product.description}</p>
+                    <p class="details-stock">В наличии: ${product.stock || 0} шт.</p>
+                    ${qtySection}
+                </div>
+            `;
+            updateMainButton();
+        }
+
+        window.selectQty = (productId, q, vPrice) => {
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            const p = products.find(x => x.id === productId);
+            if (cart[productId] && cart[productId].quantity === q) {
+                delete cart[productId];
+            } else {
+                cart[productId] = { ...p, quantity: q, price: vPrice };
+            }
+            showDetails(p);
+        };
+
+        function switchView(viewName) {
+            currentView = viewName;
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+        }
+
+        function handleBack() {
+            if (currentView === 'details') {
+                switchView('grid');
+                currentProduct = null;
+                tg.BackButton.hide();
+                tg.BackButton.offClick(handleBack);
+                updateMainButton();
+            } else if (currentView === 'checkout') {
+                switchView('grid');
+                tg.BackButton.hide();
+                tg.BackButton.offClick(handleBack);
+                updateMainButton();
+            }
+        }
+
+        function updateMainButton() {
+            tg.MainButton.offClick(handleMainButtonClick);
+            const items = Object.values(cart);
+            const total = items.reduce((sum, item) => sum + item.price, 0);
+
+            if (currentView === 'grid' || currentView === 'details') {
+                if (total > 0) {
+                    tg.MainButton.text = `Корзина: ${total} ₽ — Оформить`;
+                    tg.MainButton.show();
+                    tg.MainButton.onClick(handleMainButtonClick);
+                } else {
+                    tg.MainButton.hide();
+                }
+            } else if (currentView === 'checkout') {
+                tg.MainButton.text = `Подтвердить заказ на ${total} ₽`;
+                tg.MainButton.show();
+                tg.MainButton.onClick(handleMainButtonClick);
+            } else if (currentView === 'success') {
+                tg.MainButton.hide();
+            }
+        }
+
+        function handleMainButtonClick() {
+            if (currentView === 'grid' || currentView === 'details') {
+                showCheckout();
+            } else if (currentView === 'checkout') {
+                submitOrder();
+            }
+        }
+
+        function showCheckout() {
+            switchView('checkout');
+            tg.BackButton.show();
+            tg.BackButton.onClick(handleBack);
+
+            const items = Object.values(cart);
+            const total = items.reduce((sum, item) => sum + item.price, 0);
+
+            let summaryHTML = items.map(item => `
+                <div class="summary-item">
+                    <span>${item.name} (${item.quantity} шт.)</span>
+                    <span>${item.price} ₽</span>
+                </div>
+            `).join('');
+            summaryHTML += `
+                <div class="summary-total">
+                    <span>Итого</span>
+                    <span style="color:var(--price)">${total} ₽</span>
+                </div>
+            `;
+            document.getElementById('order-summary').innerHTML = summaryHTML;
+            updateMainButton();
+        }
+
+        function submitOrder() {
+            const fullname  = document.getElementById('fullname').value.trim();
+            const city      = document.getElementById('city').value.trim();
+            const street    = document.getElementById('street').value.trim();
+            const building  = document.getElementById('building').value.trim();
+            const corp      = document.getElementById('corp').value.trim();
+            const entrance  = document.getElementById('entrance').value.trim();
+            const floor     = document.getElementById('floor').value.trim();
+            const apartment = document.getElementById('apartment').value.trim();
+            const intercom  = document.getElementById('intercom').value.trim();
+            const phone     = document.getElementById('phone').value.trim();
+
+            if (!fullname || !city || !street || !building || !phone) {
+                tg.showAlert('Заполните обязательные поля: ФИО, Город, Улица, Дом, Телефон');
+                return;
+            }
+
+            const digits = phone.replace(/\D/g, '');
+            const isRussianPhone = digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'));
+            if (!isRussianPhone) {
+                document.getElementById('phone-error').classList.remove('hidden');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                return;
+            } else {
+                document.getElementById('phone-error').classList.add('hidden');
+            }
+
+            const address = `г. ${city}, ул. ${street}, д. ${building}` +
+                (corp      ? `, корп. ${corp}`      : '') +
+                (entrance  ? `, под. ${entrance}`   : '') +
+                (floor     ? `, эт. ${floor}`       : '') +
+                (apartment ? `, кв. ${apartment}`   : '') +
+                (intercom  ? `, домофон ${intercom}` : '');
+
+            const items = Object.values(cart);
+            const total = items.reduce((sum, item) => sum + item.price, 0);
+            const user  = tg.initDataUnsafe?.user || {};
+
+            tg.MainButton.showProgress();
+
+            fetch('/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, total, address, phone, fullname,
+                    userId: user.id, username: user.username, firstName: user.first_name })
+            })
+            .then(res => res.json())
+            .then(result => {
+                tg.MainButton.hideProgress();
+                if (result.success) {
+                    showSuccess(items, total, address);
+                    fetch('/api/products').then(r => r.json()).then(data => products = data);
+                } else {
+                    tg.showAlert(result.error || 'Ошибка оформления заказа.');
+                }
+            })
+            .catch(() => {
+                tg.MainButton.hideProgress();
+                tg.showAlert('Произошла ошибка сети.');
+            });
+        }
+
+        function showSuccess(items, total, address) {
+            switchView('success');
+            tg.BackButton.hide();
+            tg.MainButton.hide();
+
+            let html = '';
+            items.forEach(item => {
+                html += `
+                <div class="summary-item">
+                    <span>${item.product ? item.product.name : item.name} (${item.quantity} шт.)</span>
+                    <span>${item.price} ₽</span>
+                </div>`;
+            });
+            html += `
+                <div class="summary-total" style="margin-bottom:12px;">
+                    <span>Итого</span>
+                    <span style="color:var(--price)">${total} ₽</span>
+                </div>
+                <div style="border-top:1.5px solid var(--border);padding-top:12px;">
+                    <p style="color:var(--text-sec);font-size:0.88rem;line-height:1.4;">📍 <b>Адрес:</b> ${address}</p>
+                </div>
+            `;
+            document.getElementById('success-details').innerHTML = html;
+            cart = {};
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function goHome() {
+            activeCategory = 'all';
+            switchView('grid');
+            renderCategories();
+            renderGrid();
+        }
+
+        init();
+    </script>
+</body>
+</html>
