@@ -357,8 +357,21 @@ bot.on('message:web_app_data', async (ctx) => {
     }
 });
 
+async function startBot() {
+    try {
+        await bot.start({ onStart: (botInfo) => console.log(`🤖 Бот @${botInfo.username} запущен!`) });
+    } catch (e) {
+        if (e.error_code === 409) {
+            console.log('⚠️ 409 Conflict: повтор через 35 сек...');
+            await new Promise(r => setTimeout(r, 35000));
+            return startBot();
+        }
+        console.error('Критическая ошибка бота:', e);
+    }
+}
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ RF-lovers сервер запущен на порту ${PORT}`);
-    bot.start({ onStart: (botInfo) => console.log(`🤖 Бот @${botInfo.username} запущен!`) });
+    startBot();
 });
