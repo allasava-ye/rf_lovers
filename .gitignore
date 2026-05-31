@@ -5,8 +5,5 @@ node_modules/
 npm-debug.log*
 .DS_Store
 
-# Production data — не трогать при git pull на сервере
-# data/products.json — каталог товаров, редактируется через админку
-# data/users.json    — список пользователей для рассылки
-data/
+data/users.json
 public/uploads/
