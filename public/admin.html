@@ -114,6 +114,30 @@
         .btn-sm-edit   { background: #e8f0fb; color: var(--cta); }
         .btn-sm-danger { background: #fde8e8; color: var(--danger); }
 
+        /* ── Hidden toggle ── */
+        .toggle-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .toggle-label { font-size: 0.62rem; font-weight: 600; color: var(--text-sec); white-space: nowrap; }
+        .toggle-switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #d0e8d0; border-radius: 24px; transition: background 0.2s;
+        }
+        .toggle-slider:before {
+            content: ''; position: absolute;
+            height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%;
+            transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch input:checked + .toggle-slider { background: var(--danger); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+        .list-item.is-hidden { opacity: 0.45; }
+        .hidden-badge {
+            font-size: 0.68rem; font-weight: 700; color: var(--danger);
+            background: #fde8e8; border-radius: 4px; padding: 2px 6px; margin-top: 2px;
+            display: inline-block;
+        }
+
         /* ── Form ── */
         .form-header {
             padding: 16px 16px 14px;
@@ -232,7 +256,7 @@
             list.innerHTML = '';
             products.forEach(p => {
                 const el = document.createElement('div');
-                el.className = 'list-item';
+                el.className = 'list-item' + (p.hidden ? ' is-hidden' : '');
                 const minPrice = p.variants && p.variants.length > 0
                     ? Math.min(...p.variants.map(v => v.price))
                     : 0;
@@ -242,14 +266,31 @@
                         <h3>${p.name}</h3>
                         <div class="list-price">от ${minPrice} ₽</div>
                         <div class="list-stock">Остаток: ${p.stock || 0} шт.</div>
+                        ${p.hidden ? '<span class="hidden-badge">Скрыт из каталога</span>' : ''}
                     </div>
                     <div class="actions">
+                        <div class="toggle-wrap">
+                            <label class="toggle-switch" title="Закончилось">
+                                <input type="checkbox" ${p.hidden ? 'checked' : ''} onchange="toggleHidden(${p.id}, this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">Закончилось</span>
+                        </div>
                         <button class="btn-sm btn-sm-edit" onclick="editProduct(${p.id})">✏️ Ред.</button>
                         <button class="btn-sm btn-sm-danger" onclick="confirmDelete(${p.id})">🗑 Удал.</button>
                     </div>
                 `;
                 list.appendChild(el);
             });
+        }
+
+        async function toggleHidden(id, hidden) {
+            await fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hidden })
+            });
+            loadProducts();
         }
 
         function showList() {

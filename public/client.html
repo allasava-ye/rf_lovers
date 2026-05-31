@@ -8,13 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:      #ffffff;
-            --text:    #1a1a1a;
-            --text-sec:#666666;
-            --price:   #e8622a;
-            --cta:     #4a90e2;
-            --border:  #eeeeee;
-            --pill-border: #dddddd;
+            --bg:         #ffffff;
+            --text:       #1a1a1a;
+            --text-sec:   #666666;
+            --price:      #e8622a;
+            --cta:        #4a90e2;
+            --border:     #eeeeee;
+            --pill-border:#dddddd;
+            --danger:     #d94040;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,7 +38,7 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Drawer overlay ── */
+        /* ── Overlay (shared) ── */
         .drawer-overlay {
             display: none;
             position: fixed;
@@ -47,135 +48,168 @@
         }
         .drawer-overlay.open { display: block; }
 
-        /* ── Drawer ── */
+        /* ── Left Drawer ── */
         .drawer {
             position: fixed;
-            left: 0;
-            top: 0;
-            width: 78%;
-            max-width: 290px;
+            left: 0; top: 0;
+            width: 78%; max-width: 290px;
             height: 100%;
             background: #fff;
             z-index: 1000;
             transform: translateX(-100%);
             transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             box-shadow: 3px 0 24px rgba(0,0,0,0.12);
         }
         .drawer.open { transform: translateX(0); }
 
         .drawer-head {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             padding: 20px 16px 16px;
             border-bottom: 1px solid var(--border);
         }
-        .drawer-logo { width: 36px; height: 36px; object-fit: contain; }
+        .drawer-logo  { width: 36px; height: 36px; object-fit: contain; }
         .drawer-brand { font-size: 1.1rem; font-weight: 800; flex: 1; }
         .drawer-close {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
-            color: var(--text-sec);
-            padding: 4px;
-            line-height: 1;
+            background: none; border: none;
+            font-size: 1.3rem; cursor: pointer;
+            color: var(--text-sec); padding: 4px; line-height: 1;
         }
-
         .drawer-nav { padding: 8px 0; flex: 1; overflow-y: auto; }
-
         .drawer-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 16px;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 12px;
+            padding: 15px 16px; cursor: pointer;
             border-bottom: 1px solid var(--border);
             transition: background 0.15s;
         }
         .drawer-item:active { background: #f5f5f5; }
-        .drawer-item-icon { font-size: 1.2rem; flex-shrink: 0; }
-        .drawer-item-text { flex: 1; font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
-        .drawer-chevron { color: var(--text-sec); font-size: 1.2rem; }
+        .drawer-item-icon  { font-size: 1.2rem; flex-shrink: 0; }
+        .drawer-item-text  { flex: 1; font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
+        .drawer-chevron    { color: var(--text-sec); font-size: 1.2rem; }
+
+        /* ── Right Cart Drawer ── */
+        .cart-drawer {
+            position: fixed;
+            right: 0; top: 0;
+            width: 90%; max-width: 360px;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column;
+            box-shadow: -3px 0 24px rgba(0,0,0,0.12);
+        }
+        .cart-drawer.open { transform: translateX(0); }
+
+        .cart-drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+        .cart-empty {
+            padding: 48px 16px;
+            text-align: center;
+            color: var(--text-sec);
+            font-size: 0.95rem;
+        }
+        .cart-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-item-img {
+            width: 56px; height: 56px;
+            border-radius: 8px; object-fit: cover;
+            flex-shrink: 0;
+        }
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-name  { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
+        .cart-item-price { font-size: 0.88rem; color: var(--price); font-weight: 700; margin-top: 3px; }
+        .cart-item-remove {
+            background: none; border: none;
+            color: var(--text-sec); font-size: 1rem;
+            cursor: pointer; padding: 4px; flex-shrink: 0;
+            line-height: 1;
+        }
+        .cart-drawer-footer {
+            padding: 14px 16px;
+            border-top: 1.5px solid var(--border);
+        }
+        .cart-total-row {
+            display: flex; justify-content: space-between;
+            font-size: 1rem; font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .cart-total-row span:last-child { color: var(--price); }
 
         /* ── Header ── */
         .header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             padding: 14px 16px 12px;
             border-bottom: 1px solid var(--border);
             margin-bottom: 16px;
         }
         .burger-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
+            background: none; border: none; cursor: pointer;
             padding: 4px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+            display: flex; flex-direction: column; gap: 5px;
             flex-shrink: 0;
         }
-        .burger-btn span {
-            display: block;
-            width: 22px;
-            height: 2px;
-            background: var(--text);
-            border-radius: 2px;
-        }
+        .burger-btn span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
         .header-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
         .header-text { flex: 1; }
         .header-text h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.3px; line-height: 1; }
         .header-text p  { font-size: 0.72rem; color: var(--text-sec); margin-top: 2px; }
 
+        .cart-btn {
+            position: relative;
+            background: none; border: none;
+            cursor: pointer; padding: 6px;
+            flex-shrink: 0; color: var(--text);
+            display: flex; align-items: center;
+        }
+        .cart-btn svg { width: 26px; height: 26px; display: block; }
+        .cart-badge {
+            position: absolute;
+            top: 0; right: 0;
+            background: var(--price); color: #fff;
+            font-size: 0.62rem; font-weight: 700;
+            width: 17px; height: 17px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+
         .page-padding { padding: 0 16px; }
 
         /* ── Category pills ── */
         .categories-wrap {
-            overflow-x: auto;
-            scrollbar-width: none;
-            margin: 0 -16px 20px;
-            padding: 0 16px;
+            overflow-x: auto; scrollbar-width: none;
+            margin: 0 -16px 20px; padding: 0 16px;
         }
         .categories-wrap::-webkit-scrollbar { display: none; }
         .categories { display: flex; gap: 14px; width: max-content; }
 
         .cat-pill {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 5px; cursor: pointer; flex-shrink: 0;
         }
         .cat-avatar {
-            width: 58px;
-            height: 58px;
+            width: 58px; height: 58px;
             border-radius: 50%;
             border: 2px solid var(--pill-border);
-            overflow: hidden;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow: hidden; background: #f0f0f0;
+            display: flex; align-items: center; justify-content: center;
             transition: border-color 0.2s;
         }
         .cat-pill.active .cat-avatar { border-color: var(--cta); border-width: 2.5px; }
         .cat-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .cat-avatar.emoji-avatar { font-size: 1.5rem; background: var(--text); }
         .cat-pill span {
-            font-size: 0.65rem;
-            color: var(--text-sec);
-            font-weight: 500;
-            max-width: 62px;
-            text-align: center;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.65rem; color: var(--text-sec); font-weight: 500;
+            max-width: 62px; text-align: center; line-height: 1.2;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .cat-pill.active span { color: var(--cta); font-weight: 700; }
 
@@ -183,46 +217,42 @@
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
         .card {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
+            background: #fff; border-radius: 12px;
+            overflow: hidden; cursor: pointer;
             border: 1px solid var(--border);
             transition: transform 0.15s;
         }
         .card:active { transform: scale(0.97); }
         .card-img-wrap { position: relative; }
         .card img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            display: block;
-            background: #f0f0f0;
+            width: 100%; height: 160px;
+            object-fit: cover; display: block; background: #f0f0f0;
         }
         .price-tag {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: var(--price);
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.78rem;
-            padding: 3px 8px;
-            border-radius: 4px;
+            position: absolute; bottom: 8px; left: 8px;
+            background: var(--price); color: #fff;
+            font-weight: 700; font-size: 0.78rem;
+            padding: 3px 8px; border-radius: 4px;
         }
+        .card-add-btn {
+            position: absolute; bottom: 8px; right: 8px;
+            background: var(--cta); color: #fff;
+            border: none; border-radius: 6px;
+            width: 28px; height: 28px;
+            font-size: 1.3rem; line-height: 1;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: opacity 0.15s;
+        }
+        .card-add-btn:active { opacity: 0.8; }
+        .card-add-btn.in-cart { background: var(--price); }
         .card-body { padding: 10px 10px 12px; }
         .card-body h3 { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.3; }
 
         /* ── Details view ── */
-        .detail-img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            display: block;
-            background: #f0f0f0;
-        }
+        .detail-img { width: 100%; height: 300px; object-fit: cover; display: block; background: #f0f0f0; }
         .detail-body { padding: 16px; }
-        .details-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
+        .details-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
         .details-price { font-size: 1.15rem; color: var(--price); font-weight: 700; margin-bottom: 12px; }
         .details-desc  { color: var(--text-sec); line-height: 1.65; font-size: 0.95rem; margin-bottom: 14px; }
         .details-stock { font-size: 0.8rem; color: var(--text-sec); margin-bottom: 20px; }
@@ -230,21 +260,15 @@
         .qty-title { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
         .qty-grid  { display: flex; flex-wrap: wrap; gap: 8px; }
         .qty-btn {
-            background: #fff;
-            border: 1.5px solid var(--pill-border);
-            color: var(--text);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-            flex: 1 1 calc(33.333% - 8px);
-            text-align: center;
+            background: #fff; border: 1.5px solid var(--pill-border);
+            color: var(--text); padding: 10px 14px;
+            border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+            flex: 1 1 calc(33.333% - 8px); text-align: center;
             font-family: 'Inter', sans-serif;
         }
         .qty-btn.selected { background: var(--cta); color: #fff; border-color: var(--cta); }
-        .out-of-stock { color: #d94040; font-size: 1rem; font-weight: 700; margin-top: 16px; }
+        .out-of-stock { color: var(--danger); font-size: 1rem; font-weight: 700; margin-top: 16px; }
 
         /* ── Checkout form ── */
         .checkout-header { padding: 16px 16px 12px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
@@ -253,47 +277,121 @@
 
         .form-group { margin-bottom: 13px; }
         .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-sec);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+            display: block; margin-bottom: 5px;
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.4px;
         }
         .form-group input {
-            width: 100%;
-            background: #fff;
+            width: 100%; background: #fff;
             border: 1.5px solid var(--pill-border);
-            color: var(--text);
-            padding: 11px 13px;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
+            color: var(--text); padding: 11px 13px;
+            border-radius: 8px; font-size: 1rem;
+            outline: none; transition: border-color 0.2s;
             font-family: 'Inter', sans-serif;
         }
         .form-group input:focus { border-color: var(--cta); }
-        .error { color: #d94040; font-size: 0.8rem; margin-top: 4px; }
+        .error { color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
+
+        /* ── Date slots ── */
+        .date-slots-wrap {
+            overflow-x: auto; scrollbar-width: none;
+            margin: 0 -16px; padding: 0 16px;
+        }
+        .date-slots-wrap::-webkit-scrollbar { display: none; }
+        .date-slots { display: flex; gap: 8px; width: max-content; padding-bottom: 2px; }
+        .date-btn {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 2px; padding: 10px 14px;
+            background: #fff; border: 1.5px solid var(--pill-border);
+            border-radius: 10px; cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s; min-width: 62px;
+        }
+        .date-btn:active { opacity: 0.8; }
+        .date-btn.selected { background: var(--cta); border-color: var(--cta); color: #fff; }
+        .date-btn-day  { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+        .date-btn-date { font-size: 0.88rem; font-weight: 700; }
+        .date-btn.selected .date-btn-day  { color: rgba(255,255,255,0.8); }
+        .date-btn.selected .date-btn-date { color: #fff; }
+
+        /* ── Time slots ── */
+        .time-slots {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; margin-top: 2px;
+        }
+        .time-btn {
+            padding: 11px 8px; text-align: center;
+            background: #fff; border: 1.5px solid var(--pill-border);
+            border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.15s; color: var(--text);
+        }
+        .time-btn:active { opacity: 0.8; }
+        .time-btn.selected { background: var(--cta); border-color: var(--cta); color: #fff; }
+        .time-btn:disabled, .time-btn.unavail {
+            background: #f5f5f5; color: #bbb;
+            border-color: #eee; cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        /* ── Gift toggle ── */
+        .gift-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px;
+            background: #f7f7f7; border-radius: 10px;
+            margin-bottom: 13px; cursor: pointer;
+        }
+        .gift-row-text { font-size: 0.9rem; font-weight: 600; }
+        .gift-row-sub  { font-size: 0.75rem; color: var(--text-sec); margin-top: 2px; }
+
+        .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #ccc; border-radius: 26px;
+            transition: background 0.2s;
+        }
+        .toggle-slider:before {
+            content: ''; position: absolute;
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background: white; border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .toggle-switch input:checked + .toggle-slider { background: var(--cta); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        .recipient-block {
+            background: #f0f6ff; border-radius: 10px;
+            padding: 14px; margin-bottom: 13px;
+        }
+        .recipient-block .block-title {
+            font-size: 0.8rem; font-weight: 700;
+            color: var(--cta); margin-bottom: 12px;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .recipient-block .form-group { margin-bottom: 10px; }
+        .recipient-block .form-group:last-child { margin-bottom: 0; }
+
+        .section-divider {
+            font-size: 0.72rem; font-weight: 700; color: var(--text-sec);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin: 18px 0 10px;
+        }
 
         .order-summary {
-            background: #fafafa;
-            border: 1.5px solid var(--border);
-            padding: 14px;
-            border-radius: 10px;
-            margin-top: 20px;
+            background: #fafafa; border: 1.5px solid var(--border);
+            padding: 14px; border-radius: 10px; margin-top: 20px;
         }
         .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--text-sec); font-size: 0.9rem; }
         .summary-total {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
-            padding-top: 12px;
+            display: flex; justify-content: space-between;
+            margin-top: 12px; padding-top: 12px;
             border-top: 1.5px solid var(--border);
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text);
+            font-size: 1rem; font-weight: 700;
         }
+        .summary-slot { font-size: 0.82rem; color: var(--text-sec); margin-top: 8px; }
 
         /* ── Success ── */
         .success-wrap { padding: 40px 16px 0; text-align: center; }
@@ -303,81 +401,59 @@
 
         /* ── CTA button ── */
         .btn-cta {
-            display: block;
-            width: 100%;
-            background: var(--cta);
-            color: #fff;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            margin-top: 20px;
-            transition: opacity 0.15s;
+            display: block; width: 100%;
+            background: var(--cta); color: #fff;
+            border: none; padding: 14px; border-radius: 10px;
+            font-size: 1rem; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            margin-top: 20px; transition: opacity 0.15s;
         }
         .btn-cta:active { opacity: 0.85; }
+        .btn-cta-sm {
+            display: block; width: 100%;
+            background: var(--cta); color: #fff;
+            border: none; padding: 12px; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: opacity 0.15s;
+        }
+        .btn-cta-sm:active { opacity: 0.85; }
 
         /* ── Info pages ── */
         .info-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             padding: 14px 16px 12px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border); margin-bottom: 20px;
         }
         .info-header h1 { font-size: 1.1rem; font-weight: 800; line-height: 1.3; }
-
         .info-body { padding: 0 16px; }
         .info-section { margin-bottom: 22px; }
-        .info-section h2 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+        .info-section h2 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
         .info-section p, .info-section li {
-            font-size: 0.92rem;
-            color: var(--text-sec);
-            line-height: 1.65;
+            font-size: 0.92rem; color: var(--text-sec); line-height: 1.65;
         }
         .info-section ul, .info-section ol { padding-left: 18px; }
         .info-section li { margin-bottom: 6px; }
         .info-badge {
-            display: inline-flex;
-            align-items: flex-start;
-            gap: 8px;
-            background: #f7f7f7;
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            width: 100%;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text);
+            display: inline-flex; align-items: flex-start; gap: 8px;
+            background: #f7f7f7; border-radius: 8px;
+            padding: 10px 12px; margin-bottom: 8px; width: 100%;
+            font-size: 0.9rem; line-height: 1.5; color: var(--text);
         }
         .info-divider { border: none; border-top: 1.5px solid var(--border); margin: 22px 0; }
-
-        .pdf-frame {
-            width: 100%;
-            height: calc(100vh - 120px);
-            border: none;
-            border-radius: 8px;
-        }
-
+        .pdf-frame { width: 100%; height: calc(100vh - 120px); border: none; border-radius: 8px; }
         .delivery-address {
-            background: #f7f7f7;
-            border-radius: 10px;
-            padding: 14px;
-            margin-top: 12px;
+            background: #f7f7f7; border-radius: 10px; padding: 14px; margin-top: 12px;
         }
-        .delivery-address p { font-size: 0.92rem; line-height: 1.6; color: var(--text); }
-        .delivery-address strong { color: var(--text); }
+        .delivery-address p { font-size: 0.92rem; line-height: 1.6; }
     </style>
 </head>
 <body>
 
-<!-- ── Drawer overlay ── -->
+<!-- ── Left drawer overlay ── -->
 <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
 
-<!-- ── Drawer ── -->
+<!-- ── Left Drawer ── -->
 <div id="drawer" class="drawer">
     <div class="drawer-head">
         <img class="drawer-logo" src="/logo.jpg" alt="RF-lovers">
@@ -403,6 +479,19 @@
     </nav>
 </div>
 
+<!-- ── Cart drawer overlay ── -->
+<div id="cart-overlay" class="drawer-overlay" onclick="closeCartDrawer()"></div>
+
+<!-- ── Cart Drawer (right) ── -->
+<div id="cart-drawer" class="cart-drawer">
+    <div class="drawer-head">
+        <span class="drawer-brand">Корзина</span>
+        <button class="drawer-close" onclick="closeCartDrawer()">✕</button>
+    </div>
+    <div id="cart-drawer-content" class="cart-drawer-content"></div>
+    <div class="cart-drawer-footer" id="cart-drawer-footer"></div>
+</div>
+
 <div id="app">
 
     <!-- ── Products view ── -->
@@ -416,6 +505,14 @@
                 <h1>RF-lovers</h1>
                 <p>Свежие цветы с доставкой</p>
             </div>
+            <button class="cart-btn" id="cart-btn" onclick="openCartDrawer()" aria-label="Корзина">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+                <span class="cart-badge hidden" id="cart-badge">0</span>
+            </button>
         </div>
         <div class="page-padding">
             <div class="categories-wrap">
@@ -437,10 +534,35 @@
             <p>Заполните данные для доставки</p>
         </div>
         <div class="page-padding">
+
+            <!-- Delivery date -->
             <div class="form-group">
-                <label for="fullname">ФИО получателя</label>
-                <input type="text" id="fullname" placeholder="Иванов Иван Иванович">
+                <label>Дата доставки</label>
+                <div class="date-slots-wrap">
+                    <div class="date-slots" id="date-slots"></div>
+                </div>
             </div>
+
+            <!-- Time slot -->
+            <div class="form-group">
+                <label>Время доставки</label>
+                <div class="time-slots" id="time-slots"></div>
+            </div>
+
+            <div class="section-divider">Ваши данные</div>
+
+            <div class="form-group">
+                <label for="fullname">Ваше имя</label>
+                <input type="text" id="fullname" placeholder="Иван Иванов">
+            </div>
+            <div class="form-group">
+                <label for="phone">Ваш телефон</label>
+                <input type="tel" id="phone" placeholder="+7 (999) 000-00-00">
+                <div id="phone-error" class="error hidden">Введите корректный номер (+7 999 123-45-67)</div>
+            </div>
+
+            <div class="section-divider">Адрес доставки</div>
+
             <div class="form-group">
                 <label for="city">Город</label>
                 <input type="text" id="city" placeholder="Москва">
@@ -477,11 +599,33 @@
                 <label for="intercom">Домофон</label>
                 <input type="text" id="intercom" placeholder="42К">
             </div>
-            <div class="form-group">
-                <label for="phone">Телефон</label>
-                <input type="tel" id="phone" placeholder="+7 (999) 000-00-00">
-                <div id="phone-error" class="error hidden">Введите корректный номер (+7 999 123-45-67)</div>
+
+            <!-- Gift toggle -->
+            <div class="section-divider">Получатель</div>
+            <label class="gift-row" for="is-gift">
+                <div>
+                    <div class="gift-row-text">Это подарок 🎁</div>
+                    <div class="gift-row-sub">Получатель — другой человек</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="is-gift" onchange="toggleGift()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </label>
+
+            <!-- Recipient block (hidden until gift toggled) -->
+            <div id="recipient-block" class="recipient-block hidden">
+                <div class="block-title">Данные получателя</div>
+                <div class="form-group">
+                    <label for="recipient-name">Имя получателя</label>
+                    <input type="text" id="recipient-name" placeholder="Иванова Мария">
+                </div>
+                <div class="form-group">
+                    <label for="recipient-phone">Телефон получателя</label>
+                    <input type="tel" id="recipient-phone" placeholder="+7 (999) 000-00-00">
+                </div>
             </div>
+
             <div class="order-summary" id="order-summary"></div>
         </div>
     </div>
@@ -508,47 +652,40 @@
             <div class="info-section">
                 <p>Потому что цветы — живой товар, и их стоимость напрямую зависит от нескольких факторов:</p>
             </div>
-
             <div class="info-section">
                 <h2>1. Поставки и свежесть</h2>
                 <p>Каждая новая поставка приходит по своей закупочной цене. Если у производителей цена выше — она повышается и у нас. Если ниже — мы тоже снижаем.</p>
             </div>
-
             <div class="info-section">
                 <h2>2. Сезонность и спрос</h2>
                 <p>Перед праздниками (14 февраля, 8 марта, 1 сентября) спрос растёт — производители поднимают цены. Летом часть ферм работает меньше — ассортимент меняется, а цены могут прыгать.</p>
             </div>
-
             <div class="info-section">
                 <h2>3. Логистика и доступность сортов</h2>
                 <p>Если какой-то сорт мало доступен или сложнее в доставке, его цена может временно вырасти.</p>
             </div>
-
             <div class="info-section">
                 <h2>4. Скорость продажи партии</h2>
                 <p>Если партия ушла быстро, следующая может прийти дороже или дешевле — и цена меняется сразу.</p>
             </div>
-
             <div class="info-section">
                 <h2>5. Мы продаём по фактической себестоимости</h2>
-                <p>У вас нет «фиксированной» цены. Стоимость = цена закупки + минимальная операционная наценка, поэтому любая перемена на рынке отражается сразу.</p>
+                <p>Стоимость = цена закупки + минимальная операционная наценка, поэтому любая перемена на рынке отражается сразу.</p>
             </div>
-
             <hr class="info-divider">
-
             <div class="info-section">
                 <h2>Сборные букеты</h2>
                 <p>Если хочется не просто пачку, а сборный букет — наши флористы соберут сборную композицию по вашему референсу.</p>
                 <br>
                 <p>Сборные букеты оформляются по особым условиям:</p>
                 <br>
-                <div class="info-badge">🟢 <span><strong>Предоплата 100%</strong> — оформление букета возможно только после полной оплаты.</span></div>
+                <div class="info-badge">🟢 <span><strong>Предоплата 100%</strong> — оформление возможно только после полной оплаты.</span></div>
                 <div class="info-badge">🟢 <span><strong>Состав и цветовая гамма</strong> — могут отличаться от фото или пожеланий.</span></div>
-                <div class="info-badge">🟢 <span><strong>Изменения в букете:</strong> первое изменение — бесплатно, каждое последующее — 500 ₽ (если изменение не по нашей вине).</span></div>
-                <div class="info-badge">🟢 <span><strong>Переделка букета с нуля</strong> — 500 ₽ (если не по нашей вине).</span></div>
-                <div class="info-badge">🟢 <span><strong>Отмена заказа</strong> — удержание 50% от стоимости, если отмена по причине «не понравился букет».</span></div>
+                <div class="info-badge">🟢 <span><strong>Изменения в букете:</strong> первое — бесплатно, каждое последующее — 500 ₽.</span></div>
+                <div class="info-badge">🟢 <span><strong>Переделка с нуля</strong> — 500 ₽ (если не по нашей вине).</span></div>
+                <div class="info-badge">🟢 <span><strong>Отмена заказа</strong> — удержание 50%, если «не понравился букет».</span></div>
                 <br>
-                <p>Благодарим за понимание! Мы стараемся, чтобы каждый сборный букет был максимально красивым и свежим 🌸</p>
+                <p>Благодарим за понимание! Мы стараемся, чтобы каждый букет был максимально красивым и свежим 🌸</p>
             </div>
         </div>
     </div>
@@ -575,15 +712,12 @@
                 <br>
                 <p>Вы можете оформить доставку в день заказа или заранее — за 1 день, выбрав удобное время с <strong>09:00 до 23:00</strong>.</p>
             </div>
-
             <div class="info-section">
                 <h2>Стоимость доставки</h2>
                 <div class="info-badge">🟢 <span><strong>В пределах МКАД</strong> — 500 ₽</span></div>
                 <div class="info-badge">🟢 <span><strong>За пределы МКАД</strong> — рассчитывается индивидуально</span></div>
             </div>
-
             <hr class="info-divider">
-
             <div class="info-section">
                 <h2>Самовывоз</h2>
                 <div class="delivery-address">
@@ -601,25 +735,45 @@
     tg.expand();
     tg.ready();
 
-    let products      = [];
-    let cart          = {};
-    let currentView   = 'grid';
-    let prevView      = 'grid'; // для кнопки "назад" из инфо-страниц
+    let products       = [];
+    let cart           = {};
+    let currentView    = 'grid';
+    let prevView       = 'grid';
     let activeCategory = 'all';
+    let currentProduct = null;
+    let selectedDate   = null;
+    let selectedSlot   = null;
 
-    // ── Подборки (collections) ─────────────────────────────────────────────
     const COLLECTIONS = [
         { id: 'all',         label: 'Все',          emoji: '🌷' },
         { id: 'mama',        label: 'Для мамы',     emoji: null },
-        { id: 'date',        label: 'Свидание',      emoji: null },
-        { id: 'anniversary', label: 'Годовщина',     emoji: null },
-        { id: 'birthday',    label: 'День рождения', emoji: null },
-        { id: 'justbecause', label: 'Просто так',    emoji: null },
-        { id: 'colleague',   label: 'Коллеге',       emoji: null },
-        { id: 'love',        label: 'Признание',     emoji: null },
+        { id: 'date',        label: 'Свидание',     emoji: null },
+        { id: 'anniversary', label: 'Годовщина',    emoji: null },
+        { id: 'birthday',    label: 'День рождения',emoji: null },
+        { id: 'justbecause', label: 'Просто так',   emoji: null },
+        { id: 'colleague',   label: 'Коллеге',      emoji: null },
+        { id: 'love',        label: 'Признание',    emoji: null },
     ];
 
-    // ── Drawer ────────────────────────────────────────────────────────────
+    const TIME_SLOTS = [
+        '09:00–11:00','11:00–13:00','13:00–15:00','15:00–17:00',
+        '17:00–19:00','19:00–21:00','21:00–23:00'
+    ];
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    async function init() {
+        try {
+            const res = await fetch('/api/products');
+            products = await res.json();
+            renderCategories();
+            renderGrid();
+        } catch(e) {
+            console.error(e);
+            tg.showAlert('Ошибка загрузки. Перезапустите приложение.');
+        }
+    }
+
+    // ── Left Drawer ───────────────────────────────────────────────────────────
     function openDrawer() {
         document.getElementById('drawer').classList.add('open');
         document.getElementById('drawer-overlay').classList.add('open');
@@ -629,7 +783,72 @@
         document.getElementById('drawer-overlay').classList.remove('open');
     }
 
-    // ── Info pages ────────────────────────────────────────────────────────
+    // ── Cart Badge ────────────────────────────────────────────────────────────
+    function updateCartBadge() {
+        const count  = Object.values(cart).length;
+        const badge  = document.getElementById('cart-badge');
+        const cartBtn = document.getElementById('cart-btn');
+        if (!badge || !cartBtn) return;
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    // ── Cart Drawer ───────────────────────────────────────────────────────────
+    function openCartDrawer() {
+        renderCartDrawer();
+        document.getElementById('cart-drawer').classList.add('open');
+        document.getElementById('cart-overlay').classList.add('open');
+    }
+    function closeCartDrawer() {
+        document.getElementById('cart-drawer').classList.remove('open');
+        document.getElementById('cart-overlay').classList.remove('open');
+    }
+
+    function renderCartDrawer() {
+        const items   = Object.values(cart);
+        const content = document.getElementById('cart-drawer-content');
+        const footer  = document.getElementById('cart-drawer-footer');
+
+        if (items.length === 0) {
+            content.innerHTML = `<div class="cart-empty">Корзина пуста 🌷<br><span style="font-size:0.8rem">Добавьте цветы из каталога</span></div>`;
+            footer.innerHTML  = '';
+            return;
+        }
+
+        content.innerHTML = items.map(item => `
+            <div class="cart-item">
+                <img class="cart-item-img" src="${item.image}" alt="${item.name}">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price.toLocaleString('ru-RU')} ₽</div>
+                </div>
+                <button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>
+            </div>
+        `).join('');
+
+        const total = items.reduce((s, i) => s + i.price, 0);
+        footer.innerHTML = `
+            <div class="cart-total-row">
+                <span>Итого</span>
+                <span>${total.toLocaleString('ru-RU')} ₽</span>
+            </div>
+            <button class="btn-cta-sm" onclick="closeCartDrawer(); showCheckout();">Оформить заказ</button>
+        `;
+    }
+
+    window.removeFromCart = function(productId) {
+        delete cart[productId];
+        updateCartBadge();
+        updateMainButton();
+        renderCartDrawer();
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    // ── Info pages ────────────────────────────────────────────────────────────
     function openInfo(page) {
         closeDrawer();
         prevView = currentView;
@@ -654,26 +873,14 @@
         }
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────
-    async function init() {
-        try {
-            const res = await fetch('/api/products');
-            products = await res.json();
-            renderCategories();
-            renderGrid();
-        } catch (e) {
-            console.error(e);
-            tg.showAlert('Ошибка загрузки. Перезапустите приложение.');
-        }
-    }
-
-    // ── Category pills ────────────────────────────────────────────────────
+    // ── Category pills ────────────────────────────────────────────────────────
     function renderCategories() {
         const wrap = document.getElementById('categories');
         wrap.innerHTML = '';
-
         COLLECTIONS.forEach(col => {
-            const featuredProduct = col.id === 'all' ? null : products.find(p => p.category === col.id);
+            const featuredProduct = col.id === 'all'
+                ? null
+                : products.find(p => p.category === col.id && !p.hidden);
 
             const pill = document.createElement('div');
             pill.className = 'cat-pill' + (activeCategory === col.id ? ' active' : '');
@@ -687,32 +894,33 @@
             } else {
                 avatarHTML = `<div class="cat-avatar emoji-avatar">🌷</div>`;
             }
-
             pill.innerHTML = `${avatarHTML}<span>${col.label}</span>`;
             wrap.appendChild(pill);
         });
     }
 
-    // ── Product grid ──────────────────────────────────────────────────────
+    // ── Product grid ──────────────────────────────────────────────────────────
     function renderGrid() {
         const grid = document.getElementById('products-grid');
         grid.innerHTML = '';
 
-        const visible = activeCategory === 'all'
-            ? products
-            : products.filter(p => p.category === activeCategory);
+        const visible = (activeCategory === 'all' ? products : products.filter(p => p.category === activeCategory))
+            .filter(p => !p.hidden);
 
         visible.forEach(p => {
-            const minPrice = p.variants && p.variants.length > 0
-                ? Math.min(...p.variants.map(v => v.price))
-                : 0;
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.onclick = () => showDetails(p);
-            card.innerHTML = `
+            const minPrice   = p.variants && p.variants.length > 0 ? Math.min(...p.variants.map(v => v.price)) : 0;
+            const inCart     = !!cart[p.id];
+            const card       = document.createElement('div');
+            card.className   = 'card';
+            card.onclick     = () => showDetails(p);
+            card.innerHTML   = `
                 <div class="card-img-wrap">
-                    <img src="${p.image}" alt="${p.name}">
+                    <img src="${p.image}" alt="${p.name}" loading="lazy">
                     <div class="price-tag">${minPrice.toLocaleString('ru-RU')} ₽</div>
+                    <button class="card-add-btn ${inCart ? 'in-cart' : ''}"
+                        onclick="quickAdd(event, ${p.id})" aria-label="В корзину">
+                        ${inCart ? '✓' : '+'}
+                    </button>
                 </div>
                 <div class="card-body"><h3>${p.name}</h3></div>
             `;
@@ -720,7 +928,23 @@
         });
     }
 
-    // ── Details ───────────────────────────────────────────────────────────
+    window.quickAdd = function(e, productId) {
+        e.stopPropagation();
+        const p = products.find(x => x.id === productId);
+        if (!p || !p.variants || p.variants.length === 0) return;
+        if (cart[productId]) {
+            delete cart[productId];
+        } else {
+            const v = p.variants[0];
+            cart[productId] = { ...p, quantity: v.qty, price: v.price };
+        }
+        updateCartBadge();
+        updateMainButton();
+        renderGrid();
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    // ── Details ───────────────────────────────────────────────────────────────
     function showDetails(product) {
         currentProduct = product;
         switchView('details');
@@ -729,8 +953,7 @@
 
         const container = document.getElementById('details-content');
         const minPrice  = product.variants && product.variants.length > 0
-            ? Math.min(...product.variants.map(v => v.price))
-            : 0;
+            ? Math.min(...product.variants.map(v => v.price)) : 0;
 
         let qButtons = '';
         if (product.variants && product.variants.length > 0) {
@@ -738,11 +961,10 @@
                 .filter(v => v.qty <= (product.stock || 0))
                 .map(v => {
                     const isSelected = cart[product.id] && cart[product.id].quantity === v.qty;
-                    // Single variant → show as "Добавить"
                     const label = product.variants.length === 1
                         ? `<span>Добавить</span><span style="font-size:0.75rem;opacity:0.75;">${v.price.toLocaleString('ru-RU')} ₽</span>`
                         : `<span>${v.qty} шт.</span><span style="font-size:0.75rem;opacity:0.75;">${v.price.toLocaleString('ru-RU')} ₽</span>`;
-                    return `<button class="qty-btn ${isSelected ? 'selected' : ''}" onclick="selectQty(${product.id}, ${v.qty}, ${v.price})" style="display:flex;flex-direction:column;align-items:center;">${label}</button>`;
+                    return `<button class="qty-btn ${isSelected ? 'selected' : ''}" onclick="selectQty(${product.id},${v.qty},${v.price})" style="display:flex;flex-direction:column;align-items:center;">${label}</button>`;
                 }).join('');
         }
 
@@ -763,9 +985,7 @@
         updateMainButton();
     }
 
-    let currentProduct = null;
-
-    window.selectQty = (productId, q, vPrice) => {
+    window.selectQty = function(productId, q, vPrice) {
         if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         const p = products.find(x => x.id === productId);
         if (cart[productId] && cart[productId].quantity === q) {
@@ -773,10 +993,11 @@
         } else {
             cart[productId] = { ...p, quantity: q, price: vPrice };
         }
+        updateCartBadge();
         showDetails(p);
     };
 
-    // ── View switching ─────────────────────────────────────────────────────
+    // ── View switching ────────────────────────────────────────────────────────
     function switchView(viewName) {
         currentView = viewName;
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
@@ -798,11 +1019,11 @@
         }
     }
 
-    // ── Main button ────────────────────────────────────────────────────────
+    // ── Main button ───────────────────────────────────────────────────────────
     function updateMainButton() {
         tg.MainButton.offClick(handleMainButtonClick);
         const items = Object.values(cart);
-        const total = items.reduce((sum, item) => sum + item.price, 0);
+        const total = items.reduce((s, i) => s + i.price, 0);
 
         if (currentView === 'grid' || currentView === 'details') {
             if (total > 0) {
@@ -829,29 +1050,105 @@
         }
     }
 
-    // ── Checkout ───────────────────────────────────────────────────────────
+    // ── Date slots ────────────────────────────────────────────────────────────
+    function renderDateSlots() {
+        const wrap = document.getElementById('date-slots');
+        wrap.innerHTML = '';
+        const now    = new Date();
+        const days   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+        const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(now);
+            d.setDate(now.getDate() + i);
+            const dayLabel  = i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : days[d.getDay()];
+            const dateLabel = `${d.getDate()} ${months[d.getMonth()]}`;
+            const value     = d.toISOString().split('T')[0];
+
+            const btn = document.createElement('button');
+            btn.className = 'date-btn' + (selectedDate === value ? ' selected' : '');
+            btn.innerHTML = `<span class="date-btn-day">${dayLabel}</span><span class="date-btn-date">${dateLabel}</span>`;
+            btn.onclick = () => {
+                selectedDate = value;
+                selectedSlot = null;
+                renderDateSlots();
+                renderTimeSlots();
+                updateOrderSummary();
+            };
+            wrap.appendChild(btn);
+        }
+    }
+
+    // ── Time slots ────────────────────────────────────────────────────────────
+    function renderTimeSlots() {
+        const wrap = document.getElementById('time-slots');
+        wrap.innerHTML = '';
+        const now     = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const isToday  = selectedDate === todayStr;
+
+        TIME_SLOTS.forEach(slot => {
+            const startHour = parseInt(slot.split(':')[0]);
+            const unavail   = isToday && (now.getHours() >= startHour - 3);
+
+            const btn = document.createElement('button');
+            btn.className = 'time-btn' + (selectedSlot === slot ? ' selected' : '') + (unavail ? ' unavail' : '');
+            btn.textContent = slot;
+            if (unavail) {
+                btn.disabled = true;
+            } else {
+                btn.onclick = () => {
+                    selectedSlot = slot;
+                    renderTimeSlots();
+                    updateOrderSummary();
+                };
+            }
+            wrap.appendChild(btn);
+        });
+    }
+
+    // ── Gift toggle ───────────────────────────────────────────────────────────
+    window.toggleGift = function() {
+        const checked = document.getElementById('is-gift').checked;
+        document.getElementById('recipient-block').classList.toggle('hidden', !checked);
+    };
+
+    // ── Checkout ──────────────────────────────────────────────────────────────
     function showCheckout() {
         switchView('checkout');
         tg.BackButton.show();
         tg.BackButton.onClick(handleBack);
 
-        const items = Object.values(cart);
-        const total = items.reduce((sum, item) => sum + item.price, 0);
+        const today = new Date().toISOString().split('T')[0];
+        if (!selectedDate) selectedDate = today;
 
-        let summaryHTML = items.map(item => `
+        renderDateSlots();
+        renderTimeSlots();
+        updateOrderSummary();
+        updateMainButton();
+    }
+
+    function updateOrderSummary() {
+        const items = Object.values(cart);
+        const total = items.reduce((s, i) => s + i.price, 0);
+
+        let html = items.map(item => `
             <div class="summary-item">
                 <span>${item.name}</span>
                 <span>${item.price.toLocaleString('ru-RU')} ₽</span>
             </div>
         `).join('');
-        summaryHTML += `
-            <div class="summary-total">
-                <span>Итого</span>
-                <span style="color:var(--price)">${total.toLocaleString('ru-RU')} ₽</span>
-            </div>
-        `;
-        document.getElementById('order-summary').innerHTML = summaryHTML;
-        updateMainButton();
+        html += `<div class="summary-total"><span>Итого</span><span style="color:var(--price)">${total.toLocaleString('ru-RU')} ₽</span></div>`;
+        if (selectedDate || selectedSlot) {
+            const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+            let dateStr = '';
+            if (selectedDate) {
+                const d = new Date(selectedDate + 'T00:00:00');
+                dateStr = `${d.getDate()} ${months[d.getMonth()]}`;
+            }
+            html += `<div class="summary-slot">📅 ${dateStr || '—'}${selectedSlot ? ' · ⏰ ' + selectedSlot : ''}</div>`;
+        }
+        document.getElementById('order-summary').innerHTML = html;
     }
 
     function submitOrder() {
@@ -861,13 +1158,18 @@
         const building  = document.getElementById('building').value.trim();
         const corp      = document.getElementById('corp').value.trim();
         const entrance  = document.getElementById('entrance').value.trim();
-        const floor     = document.getElementById('floor').value.trim();
+        const floor_    = document.getElementById('floor').value.trim();
         const apartment = document.getElementById('apartment').value.trim();
         const intercom  = document.getElementById('intercom').value.trim();
         const phone     = document.getElementById('phone').value.trim();
+        const isGift    = document.getElementById('is-gift').checked;
+        const recipientName  = isGift ? document.getElementById('recipient-name').value.trim()  : '';
+        const recipientPhone = isGift ? document.getElementById('recipient-phone').value.trim() : '';
 
+        if (!selectedDate) { tg.showAlert('Выберите дату доставки'); return; }
+        if (!selectedSlot) { tg.showAlert('Выберите время доставки'); return; }
         if (!fullname || !city || !street || !building || !phone) {
-            tg.showAlert('Заполните обязательные поля: ФИО, Город, Улица, Дом, Телефон');
+            tg.showAlert('Заполните обязательные поля: Имя, Город, Улица, Дом, Телефон');
             return;
         }
         const digits = phone.replace(/\D/g, '');
@@ -877,30 +1179,42 @@
             return;
         }
         document.getElementById('phone-error').classList.add('hidden');
+        if (isGift && (!recipientName || !recipientPhone)) {
+            tg.showAlert('Укажите имя и телефон получателя'); return;
+        }
 
-        const address = `г. ${city}, ул. ${street}, д. ${building}` +
-            (corp      ? `, корп. ${corp}`      : '') +
-            (entrance  ? `, под. ${entrance}`   : '') +
-            (floor     ? `, эт. ${floor}`       : '') +
-            (apartment ? `, кв. ${apartment}`   : '') +
-            (intercom  ? `, домофон ${intercom}` : '');
+        const address = `г. ${city}, ул. ${street}, д. ${building}`
+            + (corp      ? `, корп. ${corp}`      : '')
+            + (entrance  ? `, под. ${entrance}`   : '')
+            + (floor_    ? `, эт. ${floor_}`      : '')
+            + (apartment ? `, кв. ${apartment}`   : '')
+            + (intercom  ? `, домофон ${intercom}` : '');
 
         const items = Object.values(cart);
-        const total = items.reduce((sum, item) => sum + item.price, 0);
+        const total = items.reduce((s, i) => s + i.price, 0);
         const user  = tg.initDataUnsafe?.user || {};
+
+        const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+        const d = new Date(selectedDate + 'T00:00:00');
+        const deliveryDateFmt = `${d.getDate()} ${months[d.getMonth()]}`;
 
         tg.MainButton.showProgress();
         fetch('/api/order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items, total, address, phone, fullname,
-                userId: user.id, username: user.username, firstName: user.first_name })
+            body: JSON.stringify({
+                items, total, address, phone, fullname,
+                userId: user.id, username: user.username, firstName: user.first_name,
+                deliveryDate: deliveryDateFmt,
+                deliverySlot: selectedSlot,
+                isGift, recipientName, recipientPhone
+            })
         })
         .then(r => r.json())
         .then(result => {
             tg.MainButton.hideProgress();
             if (result.success) {
-                showSuccess(items, total, address);
+                showSuccess(items, total, address, deliveryDateFmt, selectedSlot);
                 fetch('/api/products').then(r => r.json()).then(d => products = d);
             } else {
                 tg.showAlert(result.error || 'Ошибка оформления заказа.');
@@ -909,8 +1223,8 @@
         .catch(() => { tg.MainButton.hideProgress(); tg.showAlert('Произошла ошибка сети.'); });
     }
 
-    // ── Success ────────────────────────────────────────────────────────────
-    function showSuccess(items, total, address) {
+    // ── Success ───────────────────────────────────────────────────────────────
+    function showSuccess(items, total, address, deliveryDate, deliverySlot) {
         switchView('success');
         tg.BackButton.hide();
         tg.MainButton.hide();
@@ -920,16 +1234,18 @@
             html += `<div class="summary-item"><span>${item.name}</span><span>${item.price.toLocaleString('ru-RU')} ₽</span></div>`;
         });
         html += `
-            <div class="summary-total" style="margin-bottom:12px;">
+            <div class="summary-total" style="margin-bottom:10px;">
                 <span>Итого</span>
                 <span style="color:var(--price)">${total.toLocaleString('ru-RU')} ₽</span>
             </div>
-            <div style="border-top:1.5px solid var(--border);padding-top:12px;">
-                <p style="color:var(--text-sec);font-size:0.88rem;line-height:1.4;">📍 <b>Адрес:</b> ${address}</p>
+            <div style="border-top:1.5px solid var(--border);padding-top:10px;font-size:0.88rem;color:var(--text-sec);line-height:1.6;">
+                <p>📅 ${deliveryDate} · ⏰ ${deliverySlot}</p>
+                <p style="margin-top:4px;">📍 ${address}</p>
             </div>
         `;
         document.getElementById('success-details').innerHTML = html;
         cart = {};
+        updateCartBadge();
         if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     }
 

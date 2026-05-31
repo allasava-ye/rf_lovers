@@ -235,7 +235,8 @@ app.delete('/api/products/:id', (req, res) => {
 // Обработка заказа через HTTP POST API (не закрывая WebApp)
 app.post('/api/order', async (req, res) => {
     try {
-        const { items, total, address, phone, fullname, userId, username, firstName } = req.body;
+        const { items, total, address, phone, fullname, userId, username, firstName,
+                deliveryDate, deliverySlot, isGift, recipientName, recipientPhone } = req.body;
 
         for (const item of items) {
             const product = products.find(p => p.id === item.id);
@@ -266,12 +267,18 @@ app.post('/api/order', async (req, res) => {
             await bot.api.sendMessage(userId, userMessage, { parse_mode: 'HTML' });
         }
 
+        const recipientBlock = isGift
+            ? `\n🎁 <b>Получатель:</b> ${recipientName || '—'}\n📞 <b>Тел. получателя:</b> <code>${recipientPhone || '—'}</code>`
+            : '';
+
         const adminMessage =
             `🚨 <b>Новый заказ RF-lovers!</b>\n\n` +
             `👤 <b>Клиент:</b> ${fullname || 'Не указано'}\n` +
             `🔗 <b>Профиль:</b> <a href="tg://user?id=${userId}">${firstName || 'Без имени'}</a> (@${username || 'нет'})\n` +
             `📞 <b>Телефон:</b> <code>${phone}</code>\n` +
-            `📍 <b>Адрес:</b> <code>${address}</code>\n\n` +
+            `📍 <b>Адрес:</b> <code>${address}</code>\n` +
+            `📅 <b>Доставка:</b> ${deliveryDate || '—'} · ⏰ ${deliverySlot || '—'}` +
+            `${recipientBlock}\n\n` +
             `<b>Состав заказа:</b>\n${itemsText}\n\n` +
             `💰 <b>Общая сумма:</b> ${total} ₽`;
 
