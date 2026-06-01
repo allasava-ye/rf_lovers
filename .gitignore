@@ -6,4 +6,7 @@ npm-debug.log*
 .DS_Store
 
 data/users.json
+data/profiles.json
+data/dates.json
+data/history.json
 public/uploads/

@@ -446,6 +446,98 @@
             background: #f7f7f7; border-radius: 10px; padding: 14px; margin-top: 12px;
         }
         .delivery-address p { font-size: 0.92rem; line-height: 1.6; }
+
+        /* ── Profile ── */
+        .profile-header {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .profile-header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.3px; }
+        .profile-header p  { font-size: 0.8rem; color: var(--text-sec); margin-top: 3px; }
+
+        .auth-tabs { display: flex; gap: 0; margin-bottom: 20px; border: 1.5px solid var(--pill-border); border-radius: 10px; overflow: hidden; }
+        .auth-tab  { flex: 1; padding: 10px; text-align: center; font-size: 0.88rem; font-weight: 600; cursor: pointer; background: #fff; border: none; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+        .auth-tab.active { background: var(--cta); color: #fff; }
+
+        .profile-greeting {
+            text-align: center; padding: 20px 16px 10px;
+        }
+        .profile-avatar {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: var(--cta); color: #fff;
+            font-size: 1.6rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px;
+        }
+        .profile-name  { font-size: 1.1rem; font-weight: 800; }
+        .profile-phone { font-size: 0.85rem; color: var(--text-sec); margin-top: 3px; }
+
+        .section-title {
+            font-size: 0.72rem; font-weight: 700; color: var(--text-sec);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin: 20px 0 10px;
+        }
+
+        .date-card {
+            display: flex; align-items: center; gap: 12px;
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .date-card-icon  { font-size: 1.4rem; flex-shrink: 0; }
+        .date-card-info  { flex: 1; min-width: 0; }
+        .date-card-label { font-size: 0.9rem; font-weight: 600; }
+        .date-card-when  { font-size: 0.78rem; color: var(--text-sec); margin-top: 2px; }
+        .date-card-del   { background: none; border: none; color: #bbb; font-size: 1.1rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
+        .date-card-del:active { color: var(--danger); }
+
+        .dates-empty {
+            text-align: center; padding: 28px 16px;
+            color: var(--text-sec); font-size: 0.9rem;
+            background: #fafafa; border-radius: 10px;
+        }
+
+        .add-date-form {
+            background: #f0f6ff; border-radius: 10px;
+            padding: 14px; margin-top: 14px;
+        }
+        .add-date-form .form-group { margin-bottom: 10px; }
+        .add-date-form .form-group:last-of-type { margin-bottom: 0; }
+
+        .month-day-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .form-group select {
+            width: 100%; background: #fff;
+            border: 1.5px solid var(--pill-border);
+            color: var(--text); padding: 11px 13px;
+            border-radius: 8px; font-size: 1rem;
+            outline: none; font-family: 'Inter', sans-serif;
+            -webkit-appearance: none; appearance: none;
+        }
+
+        .btn-outline {
+            display: block; width: 100%;
+            background: #fff; color: var(--cta);
+            border: 1.5px solid var(--cta);
+            padding: 12px; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            margin-top: 4px; transition: all 0.15s;
+        }
+        .btn-outline:active { background: var(--cta); color: #fff; }
+
+        .btn-logout {
+            display: block; width: 100%;
+            background: none; color: var(--text-sec);
+            border: 1.5px solid var(--border);
+            padding: 11px; border-radius: 10px;
+            font-size: 0.88rem; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            margin-top: 16px; transition: opacity 0.15s;
+        }
+        .btn-logout:active { opacity: 0.6; }
+
+        .profile-spinner { text-align: center; padding: 60px 16px; color: var(--text-sec); }
     </style>
 </head>
 <body>
@@ -474,6 +566,11 @@
         <div class="drawer-item" onclick="openInfo('delivery')">
             <span class="drawer-item-icon">🚚</span>
             <span class="drawer-item-text">Доставка и самовывоз</span>
+            <span class="drawer-chevron">›</span>
+        </div>
+        <div class="drawer-item" onclick="openProfileView()">
+            <span class="drawer-item-icon">🗓</span>
+            <span class="drawer-item-text">Календарь важных дат</span>
             <span class="drawer-chevron">›</span>
         </div>
     </nav>
@@ -640,6 +737,17 @@
         <div class="page-padding">
             <div class="order-summary" id="success-details"></div>
             <button class="btn-cta" onclick="goHome()">Вернуться в магазин</button>
+        </div>
+    </div>
+
+    <!-- ── Profile view ── -->
+    <div id="view-profile" class="view">
+        <div class="profile-header">
+            <h1>🗓 Календарь важных дат</h1>
+            <p>За 3 дня до события бот напомнит и предложит цветы</p>
+        </div>
+        <div class="page-padding" id="profile-content">
+            <div class="profile-spinner">Загрузка...</div>
         </div>
     </div>
 
@@ -1256,6 +1364,234 @@
         renderCategories();
         renderGrid();
     }
+
+    // ── Profile & Calendar ────────────────────────────────────────────────────
+    const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    const DATE_ICONS = ['🎂','💐','💍','🌸','🎉','👨‍👩‍👧','❤️','⭐'];
+
+    let profileToken    = localStorage.getItem('rf_token') || null;
+    let profileData     = null;
+    let showAddDateForm = false;
+    let authTab         = 'login';
+
+    async function openProfileView() {
+        closeDrawer();
+        prevView = currentView;
+        switchView('profile');
+        tg.BackButton.show();
+        tg.BackButton.onClick(closeProfile);
+        tg.MainButton.hide();
+        await loadProfile();
+    }
+
+    function closeProfile() {
+        tg.BackButton.offClick(closeProfile);
+        switchView(prevView);
+        if (prevView === 'grid') { tg.BackButton.hide(); updateMainButton(); }
+    }
+
+    async function loadProfile() {
+        const content = document.getElementById('profile-content');
+        content.innerHTML = '<div class="profile-spinner">Загрузка...</div>';
+
+        // Try auto-login via Telegram ID
+        if (!profileToken) {
+            const tgUser = tg.initDataUnsafe?.user;
+            if (tgUser?.id) {
+                try {
+                    const r = await fetch('/api/auth/tg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegramId: tgUser.id }) });
+                    if (r.ok) {
+                        const d = await r.json();
+                        profileToken = d.token;
+                        profileData  = d.profile;
+                        localStorage.setItem('rf_token', profileToken);
+                    }
+                } catch(e) {}
+            }
+        }
+
+        if (profileToken) {
+            await renderProfileContent();
+        } else {
+            renderAuthForm();
+        }
+    }
+
+    function renderAuthForm() {
+        const content = document.getElementById('profile-content');
+        content.innerHTML = `
+            <p style="font-size:0.88rem;color:var(--text-sec);margin-bottom:16px;line-height:1.5;">
+                Зарегистрируйтесь, чтобы добавить важные даты — и мы сами напомним о них за 3 дня с подборкой цветов 🌷
+            </p>
+            <div class="auth-tabs">
+                <button class="auth-tab ${authTab==='login'?'active':''}" onclick="setAuthTab('login')">Войти</button>
+                <button class="auth-tab ${authTab==='register'?'active':''}" onclick="setAuthTab('register')">Регистрация</button>
+            </div>
+            <div id="auth-form-body"></div>
+        `;
+        renderAuthBody();
+    }
+
+    window.setAuthTab = function(tab) {
+        authTab = tab;
+        renderAuthForm();
+    };
+
+    function renderAuthBody() {
+        const body = document.getElementById('auth-form-body');
+        if (authTab === 'login') {
+            body.innerHTML = `
+                <div class="form-group"><label>Телефон</label><input type="tel" id="a-phone" placeholder="+7 (999) 000-00-00"></div>
+                <div class="form-group"><label>Пароль</label><input type="password" id="a-pass" placeholder="Введите пароль"></div>
+                <div id="auth-error" class="error hidden"></div>
+                <button class="btn-cta-sm" style="margin-top:12px;" onclick="doLogin()">Войти</button>
+            `;
+        } else {
+            body.innerHTML = `
+                <div class="form-group"><label>Ваше имя</label><input type="text" id="a-name" placeholder="Александр"></div>
+                <div class="form-group"><label>Телефон</label><input type="tel" id="a-phone" placeholder="+7 (999) 000-00-00"></div>
+                <div class="form-group"><label>Пароль</label><input type="password" id="a-pass" placeholder="Придумайте пароль"></div>
+                <div id="auth-error" class="error hidden"></div>
+                <button class="btn-cta-sm" style="margin-top:12px;" onclick="doRegister()">Зарегистрироваться</button>
+            `;
+        }
+    }
+
+    window.doLogin = async function() {
+        const phone = document.getElementById('a-phone').value.trim();
+        const pass  = document.getElementById('a-pass').value;
+        const errEl = document.getElementById('auth-error');
+        if (!phone || !pass) { showAuthError('Заполните все поля'); return; }
+        try {
+            const tgUser = tg.initDataUnsafe?.user;
+            const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ phone, password: pass, telegramId: tgUser?.id || null }) });
+            const d = await r.json();
+            if (!r.ok) { showAuthError(d.error || 'Ошибка'); return; }
+            profileToken = d.token; profileData = d.profile;
+            localStorage.setItem('rf_token', profileToken);
+            await renderProfileContent();
+        } catch(e) { showAuthError('Ошибка соединения'); }
+    };
+
+    window.doRegister = async function() {
+        const name  = document.getElementById('a-name')?.value.trim();
+        const phone = document.getElementById('a-phone').value.trim();
+        const pass  = document.getElementById('a-pass').value;
+        if (!name || !phone || !pass) { showAuthError('Заполните все поля'); return; }
+        if (pass.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
+        try {
+            const tgUser = tg.initDataUnsafe?.user;
+            const r = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ firstName: name, phone, password: pass, telegramId: tgUser?.id || null }) });
+            const d = await r.json();
+            if (!r.ok) { showAuthError(d.error || 'Ошибка'); return; }
+            profileToken = d.token; profileData = d.profile;
+            localStorage.setItem('rf_token', profileToken);
+            await renderProfileContent();
+        } catch(e) { showAuthError('Ошибка соединения'); }
+    };
+
+    function showAuthError(msg) {
+        const el = document.getElementById('auth-error');
+        if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    }
+
+    async function renderProfileContent() {
+        const content = document.getElementById('profile-content');
+        let dates = [];
+        try {
+            const r = await fetch('/api/dates', { headers: { 'x-auth-token': profileToken } });
+            if (r.ok) dates = await r.json();
+        } catch(e) {}
+
+        const initial = (profileData?.firstName || '?')[0].toUpperCase();
+
+        const datesHTML = dates.length === 0
+            ? `<div class="dates-empty">Дат пока нет.<br>Добавьте первую важную дату 👇</div>`
+            : dates.map(d => `
+                <div class="date-card">
+                    <span class="date-card-icon">${DATE_ICONS[Math.abs(parseInt(d.id)) % DATE_ICONS.length]}</span>
+                    <div class="date-card-info">
+                        <div class="date-card-label">${d.label}</div>
+                        <div class="date-card-when">${parseInt(d.day)} ${MONTHS_GEN[parseInt(d.month)-1]} · напомним за 3 дня</div>
+                    </div>
+                    <button class="date-card-del" onclick="deleteDate('${d.id}')">✕</button>
+                </div>
+            `).join('');
+
+        const addFormHTML = showAddDateForm ? `
+            <div class="add-date-form">
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" id="nd-label" placeholder="День рождения мамы">
+                </div>
+                <div class="month-day-row">
+                    <div class="form-group">
+                        <label>Месяц</label>
+                        <select id="nd-month">
+                            ${MONTHS_RU.map((m,i) => `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>День</label>
+                        <select id="nd-day">
+                            ${Array.from({length:31},(_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-cta-sm" onclick="saveDate()">Сохранить дату</button>
+            </div>
+        ` : '';
+
+        content.innerHTML = `
+            <div class="profile-greeting">
+                <div class="profile-avatar">${initial}</div>
+                <div class="profile-name">${profileData?.firstName || ''}</div>
+                <div class="profile-phone">${profileData?.phone || ''}</div>
+            </div>
+            <div class="section-title">Важные даты</div>
+            ${datesHTML}
+            ${addFormHTML}
+            <button class="btn-outline" onclick="toggleAddDateForm()">
+                ${showAddDateForm ? '✕ Закрыть' : '+ Добавить дату'}
+            </button>
+            <button class="btn-logout" onclick="doLogout()">Выйти из аккаунта</button>
+        `;
+    }
+
+    window.toggleAddDateForm = function() {
+        showAddDateForm = !showAddDateForm;
+        renderProfileContent();
+    };
+
+    window.saveDate = async function() {
+        const label = document.getElementById('nd-label')?.value.trim();
+        const month = document.getElementById('nd-month')?.value;
+        const day   = document.getElementById('nd-day')?.value;
+        if (!label) { tg.showAlert('Введите название даты'); return; }
+        try {
+            const r = await fetch('/api/dates', { method:'POST', headers:{'Content-Type':'application/json','x-auth-token':profileToken}, body:JSON.stringify({ label, month, day }) });
+            if (r.ok) {
+                showAddDateForm = false;
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                await renderProfileContent();
+            }
+        } catch(e) { tg.showAlert('Ошибка соединения'); }
+    };
+
+    window.deleteDate = function(id) {
+        tg.showPopup({ title: 'Удалить дату?', message: 'Напоминание об этой дате больше не будет приходить.', buttons: [{ id:'del', type:'destructive', text:'Удалить' }, { type:'cancel', text:'Отмена' }] }, async (btn) => {
+            if (btn !== 'del') return;
+            await fetch(`/api/dates/${id}`, { method:'DELETE', headers:{'x-auth-token':profileToken} });
+            await renderProfileContent();
+        });
+    };
+
+    window.doLogout = function() {
+        profileToken = null; profileData = null; showAddDateForm = false;
+        localStorage.removeItem('rf_token');
+        renderAuthForm();
+    };
 
     init();
 </script>

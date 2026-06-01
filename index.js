@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -145,6 +146,35 @@ function trackUser(from) {
         firstName: from.first_name || null,
     });
     saveUsersDb();
+}
+
+// ── Профили клиентов ──────────────────────────────────────────────────────────
+const PROFILES_FILE = path.join(__dirname, 'data', 'profiles.json');
+let profiles = [];
+try { if (fs.existsSync(PROFILES_FILE)) profiles = JSON.parse(fs.readFileSync(PROFILES_FILE, 'utf8')); } catch(e) { profiles = []; }
+function saveProfiles() { try { fs.writeFileSync(PROFILES_FILE, JSON.stringify(profiles, null, 2), 'utf8'); } catch(e) { console.error('profiles save error', e); } }
+
+// ── Важные даты клиентов ──────────────────────────────────────────────────────
+const DATES_FILE = path.join(__dirname, 'data', 'dates.json');
+let importantDates = [];
+try { if (fs.existsSync(DATES_FILE)) importantDates = JSON.parse(fs.readFileSync(DATES_FILE, 'utf8')); } catch(e) { importantDates = []; }
+function saveDates() { try { fs.writeFileSync(DATES_FILE, JSON.stringify(importantDates, null, 2), 'utf8'); } catch(e) { console.error('dates save error', e); } }
+
+// ── История заказов ───────────────────────────────────────────────────────────
+const HISTORY_FILE = path.join(__dirname, 'data', 'history.json');
+let orderHistory = [];
+try { if (fs.existsSync(HISTORY_FILE)) orderHistory = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch(e) { orderHistory = []; }
+function saveHistory() { try { fs.writeFileSync(HISTORY_FILE, JSON.stringify(orderHistory, null, 2), 'utf8'); } catch(e) { console.error('history save error', e); } }
+
+// ── Хэширование паролей (PBKDF2, без зависимостей) ───────────────────────────
+function hashPassword(password) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha256').toString('hex');
+    return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+    const [salt, hash] = stored.split(':');
+    return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha256').toString('hex') === hash;
 }
 
 // ── Рассылка о новом товаре ───────────────────────────────────────────────────
@@ -288,12 +318,128 @@ app.post('/api/order', async (req, res) => {
                 .catch(e => console.error(`Error sending to admin ${adminId}:`, e));
         }
 
+        if (userId) {
+            orderHistory.push({
+                id: Date.now().toString(),
+                telegramId: userId,
+                items: items.map(i => ({ id: i.id, name: i.name, price: i.price })),
+                date: new Date().toISOString()
+            });
+            saveHistory();
+        }
+
         res.json({ success: true });
     } catch (e) {
         console.error('Ошибка при обработке заказа:', e);
         res.status(500).json({ success: false, error: e.message });
     }
 });
+
+// ── Авторизация профилей ──────────────────────────────────────────────────────
+app.post('/api/auth/register', (req, res) => {
+    const { firstName, phone, password, telegramId } = req.body;
+    if (!firstName || !phone || !password) return res.status(400).json({ error: 'Заполните все поля' });
+    if (profiles.find(p => p.phone === phone)) return res.status(400).json({ error: 'Номер уже зарегистрирован. Войдите в аккаунт.' });
+    const token = crypto.randomBytes(32).toString('hex');
+    const profile = { id: Date.now().toString(), firstName, phone, passwordHash: hashPassword(password), token, telegramId: telegramId || null, createdAt: new Date().toISOString() };
+    profiles.push(profile);
+    saveProfiles();
+    res.json({ success: true, token, profile: { id: profile.id, firstName, phone } });
+});
+
+app.post('/api/auth/login', (req, res) => {
+    const { phone, password, telegramId } = req.body;
+    const profile = profiles.find(p => p.phone === phone);
+    if (!profile || !verifyPassword(password, profile.passwordHash)) return res.status(401).json({ error: 'Неверный номер или пароль' });
+    if (telegramId && !profile.telegramId) { profile.telegramId = telegramId; saveProfiles(); }
+    res.json({ success: true, token: profile.token, profile: { id: profile.id, firstName: profile.firstName, phone: profile.phone } });
+});
+
+app.post('/api/auth/tg', (req, res) => {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'no telegramId' });
+    const profile = profiles.find(p => String(p.telegramId) === String(telegramId));
+    if (!profile) return res.status(404).json({ notFound: true });
+    res.json({ success: true, token: profile.token, profile: { id: profile.id, firstName: profile.firstName, phone: profile.phone } });
+});
+
+// ── Важные даты ───────────────────────────────────────────────────────────────
+function authMiddleware(req, res, next) {
+    const token = req.headers['x-auth-token'];
+    const profile = profiles.find(p => p.token === token);
+    if (!profile) return res.status(401).json({ error: 'Unauthorized' });
+    req.profile = profile;
+    next();
+}
+
+app.get('/api/dates', authMiddleware, (req, res) => {
+    res.json(importantDates.filter(d => d.userId === req.profile.id));
+});
+
+app.post('/api/dates', authMiddleware, (req, res) => {
+    const { label, month, day } = req.body;
+    if (!label || !month || !day) return res.status(400).json({ error: 'Missing fields' });
+    const entry = { id: Date.now().toString(), userId: req.profile.id, label, month, day, notifiedYears: [] };
+    importantDates.push(entry);
+    saveDates();
+    res.json({ success: true, date: entry });
+});
+
+app.delete('/api/dates/:id', authMiddleware, (req, res) => {
+    importantDates = importantDates.filter(d => !(d.id === req.params.id && d.userId === req.profile.id));
+    saveDates();
+    res.json({ success: true });
+});
+
+// ── Напоминания о важных датах (проверка каждый час) ─────────────────────────
+const DAY_NAMES_RU = ['воскресенье','понедельник','вторник','среду','четверг','пятницу','субботу'];
+
+async function checkReminders() {
+    const now    = new Date();
+    const target = new Date(now);
+    target.setDate(now.getDate() + 3);
+    const tMonth   = String(target.getMonth() + 1).padStart(2, '0');
+    const tDay     = String(target.getDate()).padStart(2, '0');
+    const thisYear = now.getFullYear();
+    const dayName  = DAY_NAMES_RU[target.getDay()];
+
+    for (const entry of importantDates) {
+        if (entry.month !== tMonth || entry.day !== tDay) continue;
+        if ((entry.notifiedYears || []).includes(thisYear)) continue;
+
+        const profile = profiles.find(p => p.id === entry.userId);
+        if (!profile?.telegramId) continue;
+
+        const pastOrders = orderHistory.filter(o => String(o.telegramId) === String(profile.telegramId));
+        const pastItems  = pastOrders.flatMap(o => o.items).slice(-5);
+        const pastText   = pastItems.length > 0
+            ? `\n\nМы помним, что раньше ты заказывал${pastItems.slice(0,2).map(i => ` <b>${i.name}</b>`).join(',')} — повторим или попробуем что-то новое?`
+            : '';
+
+        const available = products.filter(p => !p.hidden && p.stock > 0);
+        const picks = [...available].sort(() => 0.5 - Math.random()).slice(0, 3);
+        const picksText = picks.map((p, i) => {
+            const minPrice = p.variants && p.variants.length > 0 ? Math.min(...p.variants.map(v => v.price)) : 0;
+            return `${i + 1}. 🌷 <b>${p.name}</b> — от ${minPrice.toLocaleString('ru-RU')} ₽`;
+        }).join('\n');
+
+        const text =
+            `🌷 <b>${profile.firstName}, привет!</b>\n\n` +
+            `В <b>${dayName}</b> — <b>${entry.label}</b>. Не забудь порадовать цветами!` +
+            `${pastText}\n\n` +
+            `<b>Варианты специально для тебя:</b>\n${picksText}`;
+
+        const keyboard = { inline_keyboard: [[{ text: '🌷 Открыть RF-lovers', web_app: { url: `${webAppUrl}/client.html` } }]] };
+
+        await bot.api.sendMessage(profile.telegramId, text, { parse_mode: 'HTML', reply_markup: keyboard })
+            .catch(e => console.error(`Reminder error [tg ${profile.telegramId}]:`, e.message));
+
+        entry.notifiedYears = [...(entry.notifiedYears || []), thisYear];
+        saveDates();
+    }
+}
+
+setInterval(checkReminders, 60 * 60 * 1000);
 
 // ── Обработка команд бота ─────────────────────────────────────────────────────
 bot.command('start', async (ctx) => {
