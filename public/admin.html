@@ -157,7 +157,8 @@
             letter-spacing: 0.4px;
         }
         .form-group input,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             background: #fff;
             border: 1.5px solid var(--border);
@@ -170,7 +171,8 @@
             font-family: 'Inter', sans-serif;
         }
         .form-group input:focus,
-        .form-group textarea:focus { border-color: var(--cta); }
+        .form-group textarea:focus,
+        .form-group select:focus { border-color: var(--cta); }
         .form-group textarea { resize: vertical; }
 
         /* ── Variant rows ── */
@@ -213,6 +215,10 @@
                 <label>Описание</label>
                 <textarea id="p-desc" rows="3"></textarea>
             </div>
+            <div class="form-group">
+                <label>Категория</label>
+                <select id="p-category"></select>
+            </div>
             <div class="form-group" id="variants-container">
                 <label>Варианты (Кол-во и Цена)</label>
             </div>
@@ -220,7 +226,7 @@
 
             <div class="form-group">
                 <label>Фотография</label>
-                <input type="file" id="p-photo" accept="image/*" capture="environment">
+                <input type="file" id="p-photo" accept="image/*">
                 <input type="hidden" id="p-image">
             </div>
             <div class="form-group">
@@ -240,6 +246,28 @@
         tg.ready();
 
         let products = [];
+        const CATEGORY_OPTIONS = [
+            { value: '',             label: 'Без категории (только в общих)' },
+            { value: 'single',       label: 'Поштучно' },
+            { value: 'mama',         label: 'Для мамы' },
+            { value: 'date',         label: 'Свидание' },
+            { value: 'anniversary',  label: 'Годовщина' },
+            { value: 'birthday',     label: 'День рождения' },
+            { value: 'justbecause',  label: 'Просто так' },
+            { value: 'colleague',    label: 'Коллеге' },
+            { value: 'love',         label: 'Признание' },
+        ];
+
+        function getCategoryLabel(value) {
+            return CATEGORY_OPTIONS.find(c => c.value === (value || ''))?.label || 'Без категории';
+        }
+
+        function renderCategorySelect(selected = '') {
+            const select = document.getElementById('p-category');
+            select.innerHTML = CATEGORY_OPTIONS
+                .map(c => `<option value="${c.value}" ${c.value === (selected || '') ? 'selected' : ''}>${c.label}</option>`)
+                .join('');
+        }
 
         async function loadProducts() {
             try {
@@ -265,6 +293,7 @@
                     <div class="list-info">
                         <h3>${p.name}</h3>
                         <div class="list-price">от ${minPrice} ₽</div>
+                        <div class="list-stock">Категория: ${getCategoryLabel(p.category)}</div>
                         <div class="list-stock">Остаток: ${p.stock || 0} шт.</div>
                         ${p.hidden ? '<span class="hidden-badge">Скрыт из каталога</span>' : ''}
                     </div>
@@ -326,6 +355,7 @@
                 document.getElementById('p-id').value    = product.id;
                 document.getElementById('p-name').value  = product.name;
                 document.getElementById('p-desc').value  = product.description || '';
+                renderCategorySelect(product.category || '');
                 document.getElementById('p-image').value = product.image;
                 document.getElementById('p-photo').value = '';
                 document.getElementById('p-stock').value = product.stock || 0;
@@ -339,6 +369,7 @@
                 document.getElementById('p-id').value    = '';
                 document.getElementById('p-name').value  = '';
                 document.getElementById('p-desc').value  = '';
+                renderCategorySelect('');
                 document.getElementById('p-image').value = '';
                 document.getElementById('p-photo').value = '';
                 document.getElementById('p-stock').value = 100;
@@ -371,6 +402,7 @@
             const id        = document.getElementById('p-id').value;
             const name      = document.getElementById('p-name').value.trim();
             const desc      = document.getElementById('p-desc').value.trim();
+            const category  = document.getElementById('p-category').value;
             let   image     = document.getElementById('p-image').value.trim();
             const stock     = parseInt(document.getElementById('p-stock').value) || 0;
             const photoFile = document.getElementById('p-photo').files?.[0] || null;
@@ -404,7 +436,7 @@
 
             if (!image) { tg.showAlert('Выберите фото или укажите ссылку'); return; }
 
-            const payload = { name, description: desc, image, variants, stock };
+            const payload = { name, description: desc, category, image, variants, stock };
 
             if (id) {
                 await fetch(`/api/products/${id}`, {
